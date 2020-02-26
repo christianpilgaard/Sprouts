@@ -18,6 +18,7 @@ def startGame (p):
     if p == 2:
         makePoint(1*width/3,1*height/2)
         makePoint(2*width/3,1*height/2)
+    rand = random.randint(0,1)
     if p == 3:
         rand = random.randint(0,1)
         if rand > 0.5:
@@ -25,14 +26,43 @@ def startGame (p):
             makePoint(2*width/3,2*height/3)
             makePoint(1*width/3,2*height/3)
         else:
-            makePoint(1*width/3,1*height/2)
-            makePoint(1*width/2,1*height/2)
-            makePoint(2*width/3,1*height/2)
+            makePoint(1*width/4,1*height/2)
+            makePoint(2*width/4,1*height/2)
+            makePoint(3*width/4,1*height/2)
+    elif p == 4:
+        if rand > 0.5:
+            makePoint(2*width/5,2*height/5)
+            makePoint(4*width/5,2*height/5)
+            makePoint(2*width/5,4*height/5)
+            makePoint(4*width/5,4*height/5)
+        else:
+            makePoint(2*width/9,2*height/5)
+            makePoint(6*width/9,2*height/5)
+            makePoint(4*width/9,4*height/5)
+            makePoint(8*width/9,4*height/5)
+    elif p == 5:
+        if rand > 0.5:
+            makePoint(2*width/5,2*height/5)
+            makePoint(4*width/5,2*height/5)
+            makePoint(2*width/5,4*height/5)
+            makePoint(4*width/5,4*height/5)
+            makePoint(3*width/5,3*height/5)
+        else:
+            makePoint(4*width/7,2*height/7)
+            makePoint(2*width/7,3*height/7)
+            makePoint(6*width/7,3*height/7)
+            makePoint(3*width/7,5*height/7)
+            makePoint(5*width/7,5*height/7)
+
+def drawPoints():
+    for content in points:
+        pygame.draw.circle(screen, black, (content[0],content[1]),20)
             
     
 points = []
-size = width, height = 500, 500
-startGame(3)
+Spaces = []
+size = width, height = 1000, 1000
+startGame(5)
 
 
 
@@ -40,28 +70,58 @@ startGame(3)
 pygame.init()
 
 
-screen = pygame.display.set_mode((width, height), RESIZABLE)
-#screen = pygame.display.set_mode(size=(0, 0), flags=pygame.FULLSCREEN, depth=0, display=0)
+#screen = pygame.display.set_mode((width, height), RESIZABLE)
+screen = pygame.display.set_mode(size=(0, 0), flags=pygame.FULLSCREEN, depth=0, display=0)
 pygame.display.set_caption("Sprouts")
 global background
 background = pygame.Surface(screen.get_size())
 background.fill(white)
 screen.blit(background, (0,0))
-pygame.display.flip()
+pygame.display.update()
 random.seed()
 
-[(1,1,0),(2,2,0)]
+drawing = False
+lastPos = None
+activePoint = None
 
 while 1:
     for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        mousePos = pygame.mouse.get_pos()
+        if event.type == QUIT:
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit()
+        elif event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                sys.exit()
 
-    
-    pygame.draw.rect(screen, black, (points[0][0],points[0][1],5,5))
-    pygame.draw.rect(screen, black, (points[1][0],points[1][1],5,5))
-    pygame.draw.rect(screen, black, (points[2][0],points[2][1],5,5))
-    pygame.display.flip()
+        elif event.type == MOUSEBUTTONDOWN:
+            # Check if mousePos is in points with select margin
+            if pygame.mouse.get_pressed()[0]:
+                for content in points:
+                    if ((abs(mousePos[0] - content[0])) < 15) & ((abs(mousePos[1] - content[1])) < 15):
+                        print(content, " selected")
+                        activePoint = content
+                        drawing = True
+            if pygame.mouse.get_pressed()[2] and drawing:
+                drawing = False
+                lastPos = None
+                activePoint = None
+                background.fill(white)
+                print("update")
+
+        # Draw freehand from active point
+        elif drawing:
+            if lastPos is not None:
+                pygame.draw.line(screen, black, lastPos, mousePos, 3)
+            lastPos = mousePos
+            # Check if mousePos is in points with select margin
+            for content in points:
+                if content == activePoint:
+                    print(mousePos)
+                elif ((abs(mousePos[0] - content[0])) < 15) & ((abs(mousePos[1] - content[1])) < 15):
+                    drawing = False
+                    lastPos = None
+                    activePoint = None
+                    print(content, "selected")
+
+    drawPoints()
+    pygame.display.update()
