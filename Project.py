@@ -62,6 +62,6 @@ while 1:
 
     
     pygame.draw.rect(screen, black, (points[0][0],points[0][1],5,5))
-    pygame.draw.rect(screen, black, (125,125,5,5))
-    pygame.draw.rect(screen, black, (225,225,5,5))
+    pygame.draw.rect(screen, black, (points[1][0],points[1][1],5,5))
+    pygame.draw.rect(screen, black, (points[2][0],points[2][1],5,5))
     pygame.display.flip()
