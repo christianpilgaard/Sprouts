@@ -57,10 +57,28 @@ def startGame (p):
 def drawPoints():
     for content in points:
         pygame.draw.circle(screen, black, (content[0],content[1]),20)
+
+def appendLine(line, x,y):
+    line.append((x,y))
+
+def drawLines():
+    for content in lines:
+        for pos in content:
+            pygame.draw.line(screen, red, pos[0], pos[1], 5)
+
+def checkCollision():
+    color = screen.get_at(pygame.mouse.get_pos())
+    if color == red:
+        return False
+    return True
+        
+
             
     
 points = []
 Spaces = []
+lines = []
+templine = []
 size = width, height = 1000, 1000
 startGame(5)
 
@@ -101,17 +119,20 @@ while 1:
                         print(content, " selected")
                         activePoint = content
                         drawing = True
+                        lines.append([])
             if pygame.mouse.get_pressed()[2] and drawing:
                 drawing = False
                 lastPos = None
                 activePoint = None
-                background.fill(white)
+                screen.fill(white)
                 print("update")
 
         # Draw freehand from active point
         elif drawing:
+            drawing = checkCollision()
             if lastPos is not None:
-                pygame.draw.line(screen, black, lastPos, mousePos, 3)
+                pygame.draw.line(screen, black, lastPos, mousePos, 5)
+                appendLine(templine, lastPos, mousePos)
             lastPos = mousePos
             # Check if mousePos is in points with select margin
             for content in points:
@@ -121,7 +142,16 @@ while 1:
                     drawing = False
                     lastPos = None
                     activePoint = None
+                    screen.fill(white)
                     print(content, "selected")
+                    lines.append(templine)
+                    templine = []
+            if not drawing:
+                lastPos = None
+                templine = []
+                screen.fill(white)
+
 
     drawPoints()
+    drawLines()
     pygame.display.update()
