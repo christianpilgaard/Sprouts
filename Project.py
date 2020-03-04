@@ -58,20 +58,56 @@ def drawPoints():
     for content in points:
         pygame.draw.circle(screen, black, (content[0],content[1]),20)
 
-def appendLine(line, x,y):
-    line.append((x,y))
+def appendPos(line, pos):
+    line.append(pos)
 
 def drawLines():
     for content in lines:
-        for pos in content:
-            pygame.draw.line(screen, red, pos[0], pos[1], 5)
+        for i, pos in enumerate(content):
+            if i-1 != -1:
+                pygame.draw.line(screen, red, content[i-1], pos, 5)
 
 def checkCollision():
     color = screen.get_at(pygame.mouse.get_pos())
     if color == red:
         return False
+    else:
+        currPos = pygame.mouse.get_pos()
+
+        for pos in templine:
+            if pos[0] == currPos:
+                return False
     return True
-        
+
+def fillBlank(pos1,pos2):
+    if pos2[0] - pos1[0] > 1:
+        length = pos2[0] - pos1[0]-1
+        for i in range(length):
+            print("1 Insert:", (pos1[0]+i+1,pos1[1]))
+            templine.append((pos1[0]+i+1,pos1[1]))
+    #if pos1[0] - pos2[0] > 1:
+    #    length = pos1[0] - pos2[0]-1
+    #    for i in range(length):
+    #        print("2 Insert:", (pos1[0]-i+1,pos1[1]))
+    #        templine.append((pos1[0]-i+1,pos1[1]))
+    if pos2[1] - pos1[1] > 1:
+        length = pos2[1] - pos1[1]-1 
+        for i in range(length):
+            print("3 Insert:", (pos1[0],pos1[1]+i+1))
+            templine.append((pos1[0],pos1[1]+i+1))
+    #if pos1[1] - pos2[1] > 1:
+    #    length = pos1[1] - pos2[1]-1
+    #    for i in range(length):
+    #        print("4 Insert:", (pos1[0],pos1[1]-i+1))
+    #        templine.append((pos1[0],pos1[1]-i+1))
+
+def 
+
+def wipe():
+    screen.fill(white)
+    drawLines()
+    drawPoints()
+
 
             
     
@@ -102,6 +138,8 @@ drawing = False
 lastPos = None
 activePoint = None
 
+drawPoints()
+
 while 1:
     for event in pygame.event.get():
         mousePos = pygame.mouse.get_pos()
@@ -119,20 +157,22 @@ while 1:
                         print(content, " selected")
                         activePoint = content
                         drawing = True
+                        lastPos = mousePos
                         lines.append([])
             if pygame.mouse.get_pressed()[2] and drawing:
                 drawing = False
                 lastPos = None
                 activePoint = None
-                screen.fill(white)
+                wipe()
                 print("update")
 
         # Draw freehand from active point
         elif drawing:
             drawing = checkCollision()
-            if lastPos is not None:
+            if lastPos != mousePos:
                 pygame.draw.line(screen, black, lastPos, mousePos, 5)
-                appendLine(templine, lastPos, mousePos)
+                fillBlank(lastPos,mousePos)
+                appendPos(templine, mousePos)
             lastPos = mousePos
             # Check if mousePos is in points with select margin
             for content in points:
@@ -142,16 +182,15 @@ while 1:
                     drawing = False
                     lastPos = None
                     activePoint = None
-                    screen.fill(white)
+                    wipe()
                     print(content, "selected")
                     lines.append(templine)
+                    mid = int(len(templine)/2)
+                    makePoint(int(templine[mid][0]),int(templine[mid][1]))
                     templine = []
             if not drawing:
                 lastPos = None
                 templine = []
-                screen.fill(white)
+                wipe()
 
-
-    drawPoints()
-    drawLines()
     pygame.display.update()
