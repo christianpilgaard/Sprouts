@@ -2,16 +2,15 @@ import pygame, random, sys
 from pygame.locals import *
 
 # TODO
-# - Fix anchoring
-# - Add restriction if node is drawn to itself
 # - Make fillBlank-method prettier
+# - BUG: Mistaken max-restrictions detected in certain cases
 
 # System related variables
 width = 800
 height = 800
 
 # Color definitions
-black = 0, 0, 0
+black = 0, 0, 0# - Fix anchoring
 white = 255, 255, 255
 red = 255, 0, 0
 green = 0, 255, 0
@@ -34,9 +33,12 @@ edges = []
 edge = []
 tempEdge = []
 
+# Game related variables
+turn = 1
+
 
 # ------------------------------------------------
-# Vertex class for initializing and operating on vertices
+# Node class for initializing and operating on vertices
 class Node:
     def __init__(self, id, x, y, relations):
         self.id = id
@@ -57,14 +59,6 @@ def updateNodes():
             pygame.draw.circle(screen, green, (int(node.x), int(node.y)), size)
         else:
             pygame.draw.circle(screen, black, (int(node.x), int(node.y)), size)
-
-
-def updateEdges():
-    for edge in edges:
-        pos = None
-        cPos = None
-        for i in edge:
-            pygame.draw.line(screen, black, i[0], i[1], 5)
 
 
 # Method for setting up initial nodes
@@ -114,11 +108,27 @@ def appendPos(line, pos):
     line.append(pos)
 
 
-def drawLines():
+def updateEdges():
     for edge in edges:
         for i, pos in enumerate(edge):
             if i - 1 != -1:
                 pygame.draw.line(screen, red, edge[i - 1], pos, 5)
+
+
+def nodeCollision(node, mousePos):
+    if not ((abs(mousePos[0] - node.x)) < margin) & ((abs(mousePos[1] - node.y)) < margin):
+        return False
+    return True
+
+
+def reverseNodeCollision(node, mousePos):
+    if not ((abs(mousePos[0] - node.x)) > margin) & ((abs(mousePos[1] - node.y)) > margin):
+        return False
+    return True
+
+
+def getPlayer():
+    return turn % 2
 
 
 def checkCollision():
@@ -127,7 +137,6 @@ def checkCollision():
         return False
     else:
         currPos = pygame.mouse.get_pos()
-
         for pos in tempEdge:
             if pos[0] == currPos:
                 return False
@@ -187,7 +196,12 @@ def fillBlank(pos1, pos2):
 
 def wipe():
     screen.fill(white)
-    drawLines()
+    if getPlayer() == 1:
+        text = font.render('1st player', True, green, blue)
+    else:
+        text = font.render('2nd player', True, green, blue)
+    screen.blit(text, textRect)
+    updateEdges()
     updateNodes()
 
 # ------------------------------------------------
@@ -199,6 +213,25 @@ background = pygame.Surface(screen.get_size())
 background.fill(white)
 screen.blit(background, (0, 0))
 random.seed()
+
+# create a font object.
+# 1st parameter is the font file
+# which is present in pygame.
+# 2nd parameter is size of the font
+font = pygame.font.Font('freesansbold.ttf', 32)
+
+# create a text suface object,
+# on which text is drawn on it.
+text = font.render('1st player', True, green, blue)
+
+# create a rectangular object for the
+# text surface object
+textRect = text.get_rect()
+w, h = pygame.display.get_surface().get_size()
+textRect.center = (w/2, h/8)
+
+screen.blit(background, (0, 0))
+screen.blit(text, textRect)
 
 # Initialize nodes
 startGame(5)
@@ -219,11 +252,12 @@ while 1:
         # Mouse 1 for drawing
         elif event.type == MOUSEBUTTONDOWN:
             for node in nodes:
-                if ((abs(mousePos[0] - node.x)) < margin) & ((abs(mousePos[1] - node.y)) < margin):
+                if nodeCollision(node, mousePos):
                     if len(node.relations) < 3:
                         print(node.id, " selected.")
                         activeNode = node
                         activeItem = node.id
+                        node.relations.append(-1)
                         drawing = True
                         lastPos = mousePos
                         edges.append([])
@@ -241,12 +275,12 @@ while 1:
             # Check if any node or line is hit -----------------------------
             # Avoid initially targeting active point
             if not moved:
-                if ((abs(mousePos[0] - activeNode.x)) > margin) & ((abs(mousePos[1] - activeNode.y)) > margin):
+                if reverseNodeCollision(nodes.__getitem__(activeItem), mousePos):
                     moved = True
             else:
                 # Check for hit detection while drawing
                 for i, node in enumerate(nodes):
-                    if (abs(mousePos[0] - (node.x + (size/2))) < margin-10) & ((abs(mousePos[1] - (node.y + (size / 2)))) < margin - 10):
+                    if nodeCollision(node, mousePos):
                         if len(node.relations) < 3:
                             # Append an edge connecting the nodes
                             # Add new node on edge
@@ -254,6 +288,9 @@ while 1:
                             mid = int(len(tempEdge) / 2)
                             addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))
                             tempEdge = []
+
+                            # Remove placeholder relation
+                            nodes.__getitem__(activeItem).relations.remove(-1)
 
                             # Add relations between connected nodes
                             nodes.__getitem__(activeItem).relations.append(nodes[-1].id)
@@ -263,10 +300,18 @@ while 1:
                             activeNode = None
                             activeItem = None
 
+                            # Change turn
+                            turn += 1
+
                         # Reset current drawing
                         lastPos = None
                         moved = False
                         drawing = False
+
+                        # Remove placeholder relation
+                        if activeItem is not None:
+                            if -1 in nodes.__getitem__(activeItem).relations:
+                                nodes.__getitem__(activeItem).relations.remove(-1)
 
                         # Print node relations
                         for node in nodes:
