@@ -3,14 +3,13 @@ from pygame.locals import *
 
 # TODO
 # - Make fillBlank-method prettier
-# - BUG: Mistaken max-restrictions detected in certain cases
 
 # System related variables
 width = 800
 height = 800
 
 # Color definitions
-black = 0, 0, 0# - Fix anchoring
+black = 0, 0, 0
 white = 255, 255, 255
 red = 255, 0, 0
 green = 0, 255, 0
@@ -22,11 +21,11 @@ drawing = False
 lastPos = None
 activeNode = None
 moved = False
-margin = 20
 
 # Node related variables
 nodes = []
 size = 20
+margin = size
 
 # Edge related variables
 edges = []
@@ -47,6 +46,13 @@ class Node:
         self.relations = relations
 
 
+# ------------------------------------------------
+# Edge class for initializing and operating on edges
+class Edge:
+    def __init__(self, pos, relations):
+        self.pos = pos
+        self.relations = relations
+
 # Method for adding vertices
 def addNode(x, y):
     v = Node(len(nodes), x, y, [])
@@ -59,6 +65,8 @@ def updateNodes():
             pygame.draw.circle(screen, green, (int(node.x), int(node.y)), size)
         else:
             pygame.draw.circle(screen, black, (int(node.x), int(node.y)), size)
+
+
 
 
 # Method for setting up initial nodes
@@ -143,6 +151,18 @@ def checkCollision():
     return True
 
 
+def checkEdge(tempEdge):
+    seen = []
+
+    for i, pos in enumerate(tempEdge):
+        if pos in seen:
+            return False
+        else:
+            seen.append(pos)
+
+    return True
+
+
 def fillBlank(pos1, pos2):
     # ADD TO X AND ADD TO Y
     new_posX = ()
@@ -193,6 +213,12 @@ def fillBlank(pos1, pos2):
     if new_pos != pos2 and new_pos != ():
         fillBlank(new_pos, pos2)
 
+def fillEdge(p1, p2):
+    # Find x
+    p1diff = p1[0] - p2[0]
+
+    # Find y
+
 
 def wipe():
     screen.fill(white)
@@ -203,6 +229,7 @@ def wipe():
     screen.blit(text, textRect)
     updateEdges()
     updateNodes()
+
 
 # ------------------------------------------------
 # Initialize screen
@@ -284,29 +311,34 @@ while 1:
                         if len(node.relations) < 3:
                             # Append an edge connecting the nodes
                             # Add new node on edge
-                            edges.append(tempEdge)
-                            mid = int(len(tempEdge) / 2)
-                            addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))
-                            tempEdge = []
 
-                            # Remove placeholder relation
-                            nodes.__getitem__(activeItem).relations.remove(-1)
+                            if checkEdge(tempEdge):
+                                edges.append(tempEdge)
+                                mid = int(len(tempEdge) / 2)
+                                addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))
+                                tempEdge = []
 
-                            # Add relations between connected nodes
-                            nodes.__getitem__(activeItem).relations.append(nodes[-1].id)
-                            nodes.__getitem__(node.id).relations.append(nodes[-1].id)
-                            nodes.__getitem__(-1).relations.append(activeItem)
-                            nodes.__getitem__(-1).relations.append(node.id)
-                            activeNode = None
-                            activeItem = None
+                                # Remove placeholder relation
+                                nodes.__getitem__(activeItem).relations.remove(-1)
 
-                            # Change turn
-                            turn += 1
+                                # Add relations between connected nodes
+                                nodes.__getitem__(activeItem).relations.append(nodes[-1].id)
+                                nodes.__getitem__(node.id).relations.append(nodes[-1].id)
+                                nodes.__getitem__(-1).relations.append(activeItem)
+                                nodes.__getitem__(-1).relations.append(node.id)
+                                activeNode = None
+                                activeItem = None
+
+                                # Change turn
+                                turn += 1
+                                print("Hit node")
 
                         # Reset current drawing
                         lastPos = None
                         moved = False
                         drawing = False
+
+                        print("Hit something else")
 
                         # Remove placeholder relation
                         if activeItem is not None:
@@ -321,12 +353,26 @@ while 1:
                         wipe()
 
             if not drawing:
+                # Reset current drawing
                 lastPos = None
+                moved = False
+                drawing = False
                 tempEdge = []
-                wipe()
 
+                print("Hit something else")
+
+                # Remove placeholder relation
+                if activeItem is not None:
+                    if -1 in nodes.__getitem__(activeItem).relations:
+                        nodes.__getitem__(activeItem).relations.remove(-1)
+
+                # Print node relations
+                for node in nodes:
+                    print(node.id, ": ", node.relations)
+
+                # Reset
+                wipe()
 
     # Update
     updateNodes()
     pygame.display.update()
-
