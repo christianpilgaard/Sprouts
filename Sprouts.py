@@ -1,4 +1,4 @@
-import pygame, random, sys
+import pygame, random, sys, math
 from pygame.locals import *
 
 # TODO
@@ -24,6 +24,8 @@ moved = False
 
 # Node related variables
 nodes = []
+unlockedNodes = []
+lockedNodes = []
 size = 20
 margin = size
 
@@ -39,11 +41,12 @@ turn = 1
 # ------------------------------------------------
 # Node class for initializing and operating on vertices
 class Node:
-    def __init__(self, id, x, y, relations):
+    def __init__(self, id, x, y, relations, locked):
         self.id = id
         self.x = x
         self.y = y
         self.relations = relations
+        self.locked = locked
 
 
 # ------------------------------------------------
@@ -53,92 +56,55 @@ class Edge:
         self.pos = pos
         self.relations = relations
 
-# Method for adding vertices
-def addNode(x, y):
-    v = Node(len(nodes), x, y, [])
-    nodes.append(v)
-
-
-def updateNodes():
-    for node in nodes:
-        if len(node.relations) == 3:
-            pygame.draw.circle(screen, green, (int(node.x), int(node.y)), size)
-        else:
-            pygame.draw.circle(screen, black, (int(node.x), int(node.y)), size)
-
-
-
 
 # Method for setting up initial nodes
-def startGame(p):
+def startGame(n):
     nodes.clear()
-    if p == 2:
-        addNode(1 * width / 3, 1 * height / 2)
-        addNode(2 * width / 3, 1 * height / 2)
-    rand = random.randint(0, 1)
-    if p == 3:
-        rand = random.randint(0, 1)
-        if rand > 0.5:
-            addNode(1 * width / 2, 1 * height / 3)
-            addNode(2 * width / 3, 2 * height / 3)
-            addNode(1 * width / 3, 2 * height / 3)
-        else:
-            addNode(1 * width / 4, 1 * height / 2)
-            addNode(2 * width / 4, 1 * height / 2)
-            addNode(3 * width / 4, 1 * height / 2)
-    elif p == 4:
-        if rand > 0.5:
-            addNode(2 * width / 5, 2 * height / 5)
-            addNode(4 * width / 5, 2 * height / 5)
-            addNode(2 * width / 5, 4 * height / 5)
-            addNode(4 * width / 5, 4 * height / 5)
-        else:
-            addNode(2 * width / 9, 2 * height / 5)
-            addNode(6 * width / 9, 2 * height / 5)
-            addNode(4 * width / 9, 4 * height / 5)
-            addNode(8 * width / 9, 4 * height / 5)
-    elif p == 5:
-        if rand > 0.5:
-            addNode(2 * width / 5, 2 * height / 5)
-            addNode(4 * width / 5, 2 * height / 5)
-            addNode(2 * width / 5, 4 * height / 5)
-            addNode(4 * width / 5, 4 * height / 5)
-            addNode(3 * width / 5, 3 * height / 5)
-        else:
-            addNode(4 * width / 7, 2 * height / 7)
-            addNode(2 * width / 7, 3 * height / 7)
-            addNode(6 * width / 7, 3 * height / 7)
-            addNode(3 * width / 7, 5 * height / 7)
-            addNode(5 * width / 7, 5 * height / 7)
+    angle = 0
+    for i in range(n):
+        x = (width/4) * math.cos(angle*0.0174532925)
+        y = (width/4) * math.sin(angle*0.0174532925)
+        addNode((width/2)+x, (height/2)+y)
+        angle += 360/n
 
 
+# Method for adding vertices
+def addNode(x, y):
+    v = Node(len(nodes), x, y, [], False)
+    nodes.append(v)
+    unlockedNodes.append(v)
+
+
+# Method for appending position to line
 def appendPos(line, pos):
     line.append(pos)
 
 
-def updateEdges():
-    for edge in edges:
-        for i, pos in enumerate(edge):
-            if i - 1 != -1:
-                pygame.draw.line(screen, red, edge[i - 1], pos, 5)
-
-
+# Method for checking whether a node
 def nodeCollision(node, mousePos):
+
+    color = screen.get_at(pygame.mouse.get_pos())
+    if color == black and moved:
+        return False
+
     if not ((abs(mousePos[0] - node.x)) < margin) & ((abs(mousePos[1] - node.y)) < margin):
         return False
     return True
 
 
+# Method for checking a position has reached a certain distance away from a node
 def reverseNodeCollision(node, mousePos):
-    if not ((abs(mousePos[0] - node.x)) > margin) & ((abs(mousePos[1] - node.y)) > margin):
+    if not ((abs(mousePos[0] - node.x)) > size) & ((abs(mousePos[1] - node.y)) > size):
         return False
     return True
 
 
+# Method for getting active player
 def getPlayer():
     return turn % 2
 
 
+# Method for checking whether the current mouse-position collides with a node or an edge
 def checkCollision():
     color = screen.get_at(pygame.mouse.get_pos())
     if color == red:
@@ -151,18 +117,18 @@ def checkCollision():
     return True
 
 
+# Method for checking whether an edge overlaps itself
 def checkEdge(tempEdge):
     seen = []
-
     for i, pos in enumerate(tempEdge):
         if pos in seen:
             return False
         else:
             seen.append(pos)
-
     return True
 
 
+# Method for filling blank coordinates between two registered points in an edge
 def fillBlank(pos1, pos2):
     # ADD TO X AND ADD TO Y
     new_posX = ()
@@ -213,14 +179,41 @@ def fillBlank(pos1, pos2):
     if new_pos != pos2 and new_pos != ():
         fillBlank(new_pos, pos2)
 
-def fillEdge(p1, p2):
-    # Find x
-    p1diff = p1[0] - p2[0]
 
-    # Find y
+# Method checking if two nodes can collide
+def checkNodes(node1, node2):
+    return True
 
 
-def wipe():
+# Method for removing placeholder item
+def removePlaceholder():
+    if activeItem is not None:
+        if -1 in nodes.__getitem__(activeItem).relations:
+            nodes.__getitem__(activeItem).relations.remove(-1)
+
+
+# Method for updating nodes
+def updateNodes():
+    for node in nodes:
+        if len(node.relations) == 3:
+            pygame.draw.circle(screen, green, (int(node.x), int(node.y)), size)
+            if node not in lockedNodes:
+                node.locked = True
+                lockedNodes.append(node)
+        else:
+            pygame.draw.circle(screen, black, (int(node.x), int(node.y)), size)
+
+
+# Method for updating edges
+def updateEdges():
+    for edge in edges:
+        for i, pos in enumerate(edge):
+            if i - 1 != -1:
+                pygame.draw.line(screen, red, edge[i - 1], pos, 5)
+
+
+# Method updating screen
+def updateScreen():
     screen.fill(white)
     if getPlayer() == 1:
         text = font.render('1st player', True, green, blue)
@@ -261,7 +254,7 @@ screen.blit(background, (0, 0))
 screen.blit(text, textRect)
 
 # Initialize nodes
-startGame(5)
+startGame(6)
 
 # Game loop -----------------------------
 while 1:
@@ -294,7 +287,7 @@ while 1:
             drawing = checkCollision()
             if lastPos is not None:
                 if lastPos != mousePos:
-                    pygame.draw.line(screen, black, lastPos, mousePos, 5)
+                    pygame.draw.line(screen, blue, lastPos, mousePos, 5)
                     fillBlank(lastPos, mousePos)
                     appendPos(tempEdge, mousePos)
             lastPos = mousePos
@@ -331,26 +324,17 @@ while 1:
 
                                 # Change turn
                                 turn += 1
-                                print("Hit node")
 
                         # Reset current drawing
                         lastPos = None
                         moved = False
                         drawing = False
 
-                        print("Hit something else")
-
                         # Remove placeholder relation
-                        if activeItem is not None:
-                            if -1 in nodes.__getitem__(activeItem).relations:
-                                nodes.__getitem__(activeItem).relations.remove(-1)
+                        removePlaceholder()
 
-                        # Print node relations
-                        for node in nodes:
-                            print(node.id, ": ", node.relations)
-
-                        # Reset
-                        wipe()
+                        # Update screen
+                        updateScreen()
 
             if not drawing:
                 # Reset current drawing
@@ -359,19 +343,11 @@ while 1:
                 drawing = False
                 tempEdge = []
 
-                print("Hit something else")
-
                 # Remove placeholder relation
-                if activeItem is not None:
-                    if -1 in nodes.__getitem__(activeItem).relations:
-                        nodes.__getitem__(activeItem).relations.remove(-1)
+                removePlaceholder()
 
-                # Print node relations
-                for node in nodes:
-                    print(node.id, ": ", node.relations)
-
-                # Reset
-                wipe()
+                # Update screen
+                updateScreen()
 
     # Update
     updateNodes()
