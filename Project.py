@@ -33,7 +33,6 @@ margin = size
 
 # Edge related variables
 edges = []
-edge = []
 tempEdge = []
 
 # Triangulation related variables
@@ -328,7 +327,13 @@ while 1:
                                     #remove startnode, if there are only chosen 1 centroid = no loop
                                     if ([activeNode.x, activeNode.y] in neighbours) and (len(chosenCenter) < 2):
                                         neighbours.remove([activeNode.x, activeNode.y])
-                                    updateScreen()
+                                    for node in nodes:
+                                        for n in neighbours:
+                                            if ([node.x, node.y] == n) and node.locked:
+                                                neighbours.remove([node.x, node.y])
+                                    updateNodes()
+                                    updateCentroids()
+                                    updateNeighbours()
 
                                     lastPos = mousePos
                 for node in nodes:
