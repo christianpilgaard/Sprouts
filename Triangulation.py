@@ -1,3 +1,6 @@
+import math
+
+
 class Point:
     def __init__(self, point):
         self.point = point
@@ -25,19 +28,21 @@ class Triangle:
     def __init__(self, point1, point2, point3, edge1, edge2, edge3):
         self.points = (point1, point2, point3)
         self.edges = (edge1, edge2, edge3)
-        self.centroid = Centroid(self.calculateCentroid([point1, point2, point3]), self)
+        self.center = InCenter(self.calculateCenter([point1, point2, point3]), self)
 
-    def calculateCentroid(self, tri):
-        x_coords = tri[0].x + tri[1].x + tri[2].x
-        y_coords = tri[0].y + tri[1].y + tri[2].y
-        _len = 3
-        centroid_x = x_coords / _len
-        centroid_y = y_coords / _len
-        centroid = [centroid_x, centroid_y]
-        return centroid
+    def calculateCenter(self, tri):
+        A = tri[2]
+        B = tri[1]
+        C = tri[0]
+        a = math.sqrt(abs((tri[0].x) - (tri[1].x)) ** 2 + abs((tri[0].y) - (tri[1].y)) ** 2)
+        b = math.sqrt(abs((tri[0].x) - (tri[2].x)) ** 2 + abs((tri[0].y) - (tri[2].y)) ** 2)
+        c = math.sqrt(abs((tri[1].x) - (tri[2].x)) ** 2 + abs((tri[1].y) - (tri[2].y)) ** 2)
+
+        center = [((a * A.x) + (b * B.x) + (c * C.x)) / (a + b + c), ((a * A.y) + (b * B.y) + (c * C.y)) / (a + b + c)]
+        return center
 
 
-class Centroid:
+class InCenter:
     def __init__(self, point, triangle):
         self.x = point[0]
         self.y = point[1]
@@ -54,7 +59,7 @@ class Triangulation(Point, Edge, Triangle):
     def exportCentroids(self):
         centroids = []
         for tri in self.allTriangles:
-            c = tri.centroid
+            c = tri.center
             centroids.append([c.x, c.y])
         return centroids
 
@@ -163,7 +168,7 @@ class Triangulation(Point, Edge, Triangle):
             newEdge2.drawn = True
 
         if len(centroids) == 1:
-            center = self.getCentroid(centroids[0])
+            center = self.getCenter(centroids[0])
             self.deleteTriangle(center.triangle, [])
 
             self.addPoint(midPoint)
@@ -180,7 +185,7 @@ class Triangulation(Point, Edge, Triangle):
 
         if len(centroids) > 1:
             # Add first centroid
-            center = self.getCentroid(centroids[0])
+            center = self.getCenter(centroids[0])
             self.deleteTriangle(center.triangle, [])
 
             self.addPoint(centroids[0])
@@ -313,9 +318,9 @@ class Triangulation(Point, Edge, Triangle):
             if (int(p.x) == int(point[0])) and (int(p.y) == int(point[1])):
                 return p
 
-    def getCentroid(self, point):
+    def getCenter(self, point):
         for tri in self.allTriangles:
-            c = tri.centroid
+            c = tri.center
             if (c.x == point[0]) and (c.y == point[1]):
                 return c
 
@@ -330,10 +335,10 @@ class Triangulation(Point, Edge, Triangle):
                 elif edge.end == chosenPoint:
                     Neighbours.append(edge.start.point)
             for tri in chosenPoint.pointInTriangles:
-                Neighbours.append([tri.centroid.x, tri.centroid.y])
+                Neighbours.append([tri.center.x, tri.center.y])
         elif typeOfNode == "centerNode":
             # Add all points of the triangle the centroid is in and the centroids in the neighbouring triangles
-            center = self.getCentroid(coords)
+            center = self.getCenter(coords)
             tri = center.triangle
             for point in tri.points:
                 Neighbours.append(point.point)
@@ -341,6 +346,6 @@ class Triangulation(Point, Edge, Triangle):
                 if not edge.drawn:
                     for triangle in edge.edgeInTriangles:
                         if triangle != tri:
-                            if [triangle.centroid.x, triangle.centroid.y] not in alreadyChosen:
-                                Neighbours.append([triangle.centroid.x, triangle.centroid.y])
+                            if [triangle.center.x, triangle.center.y] not in alreadyChosen:
+                                Neighbours.append([triangle.center.x, triangle.center.y])
         return Neighbours

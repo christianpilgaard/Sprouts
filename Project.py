@@ -36,7 +36,7 @@ edges = []
 tempEdge = []
 
 # Triangulation related variables
-delauneyNodes = []
+cornerNodes = []
 centroids = []
 chosenCenter = []
 centersize = 5
@@ -70,8 +70,8 @@ def startGame(n):
     nodes.clear()
     angle = 0
     for i in range(n):
-        x = (width / 4) * math.cos(angle * 0.0174532925)
-        y = (width / 4) * math.sin(angle * 0.0174532925)
+        x = (width / 3.5) * math.cos(angle * 0.0174532925)
+        y = (width / 3.5) * math.sin(angle * 0.0174532925)
         addNode((width / 2) + x, (height / 2) + y)
         angle += 360 / n
 
@@ -81,7 +81,6 @@ def addNode(x, y):
     v = Node(len(nodes), x, y, [], False)
     nodes.append(v)
     unlockedNodes.append(v)
-    delauneyNodes.append([x, y])
 
 
 # Method for appending position to line
@@ -272,7 +271,7 @@ text = font.render('1st player', True, green, blue)
 # text surface object
 textRect = text.get_rect()
 w, h = pygame.display.get_surface().get_size()
-textRect.center = (w / 2, h / 8)
+textRect.center = (w / 2, h / 10)
 
 screen.blit(background, (0, 0))
 screen.blit(text, textRect)
@@ -282,15 +281,20 @@ screen.blit(text, textRect)
 startGame(6)
 dt = Triangulation()
 # Insert all startnodes one by one
-delauneyNodes.append([800, 800])
-delauneyNodes.append([800, 100])
-delauneyNodes.append([1, 800])
-delauneyNodes.append([1, 100])
-
-
-for s in delauneyNodes:
-    dt.addPoint(s)
+for n in nodes:
+    dt.addPoint([n.x, n.y])
 centroids = dt.exportCentroids()
+
+#Add corners
+cornerNodes.append([800, 800])
+cornerNodes.append([1, 100])
+cornerNodes.append([800, 100])
+cornerNodes.append([1, 800])
+
+for n in cornerNodes:
+    dt.addPoint(n)
+centroids = dt.exportCentroids()
+
 updateCentroids()
 updateNodes()
 
@@ -328,6 +332,10 @@ while 1:
                                 for n in neighbours:
                                     if ([node2.x, node2.y] == n) and node2.locked:
                                         neighbours.remove([node2.x, node2.y])
+                            for nd in cornerNodes:
+                                for n in neighbours:
+                                    if nd == n:
+                                        neighbours.remove(nd)
                             updateNeighbours()
             else:
                 for centerNode in centroids:
@@ -337,6 +345,8 @@ while 1:
                                 if lastPos != mousePos:
                                     edges.append([lastPos, mousePos])
                                     chosenCenter.append(centerNode)
+
+                                    neighbours.clear()
                                     neighbours = dt.exportNeighbours(centerNode, "centerNode", chosenCenter)
                                     #remove startnode, if there are only chosen 1 centroid = no loop
                                     if ([activeNode.x, activeNode.y] in neighbours) and (len(chosenCenter) < 2):
@@ -345,6 +355,10 @@ while 1:
                                         for n in neighbours:
                                             if ([node.x, node.y] == n) and node.locked:
                                                 neighbours.remove([node.x, node.y])
+                                    for nd in cornerNodes:
+                                        for n in neighbours:
+                                            if nd == n:
+                                                neighbours.remove(nd)
                                     updateNodes()
                                     updateCentroids()
                                     updateNeighbours()
