@@ -294,7 +294,7 @@ class Triangulation(Point, Edge, Triangle):
 
     def getPoint(self, point):
         for p in self.allPoints:
-            if (p.x == point[0]) and (p.y == point[1]):
+            if (int(p.x) == int(point[0])) and (int(p.y) == int(point[1])):
                 return p
 
     def getCentroid(self, point):
@@ -306,26 +306,25 @@ class Triangulation(Point, Edge, Triangle):
     def exportNeighbours(self, coords, typeOfNode, alreadyChosen):
         Neighbours = []
         if typeOfNode == "node":
+            chosenPoint = self.getPoint(coords)
             # Add all points where there are an edge between and the centroid for the triangles the point is a part of
-            for tri in self.allTriangles:
-                for point in tri.points:
-                    if point.point == coords:
-                        for point in tri.points:
-                            if (point.point != coords) and (point.point not in alreadyChosen):
-                                Neighbours.append(point.point)
-                        if [tri.centroid.x, tri.centroid.y] not in alreadyChosen:
-                            Neighbours.append([tri.centroid.x, tri.centroid.y])
+            for edge in self.allEdges:
+                if edge.start == chosenPoint:
+                    Neighbours.append(edge.end.point)
+                elif edge.end == chosenPoint:
+                    Neighbours.append(edge.start.point)
+            for tri in chosenPoint.pointInTriangles:
+                Neighbours.append([tri.centroid.x, tri.centroid.y])
         elif typeOfNode == "centerNode":
             # Add all points of the triangle the centroid is in and the centroids in the neighbouring triangles
-            for tri in self.allTriangles:
-                if coords == [tri.centroid.x, tri.centroid.y]:
-                    for point in tri.points:
-                        if point.point not in alreadyChosen:
-                            Neighbours.append(point.point)
-                    for edge in tri.edges:
-                        if not edge.drawn:
-                            for triangle in edge.edgeInTriangles:
-                                if triangle != tri:
-                                    if [triangle.centroid.x, triangle.centroid.y] not in alreadyChosen:
-                                        Neighbours.append([triangle.centroid.x, triangle.centroid.y])
+            center = self.getCentroid(coords)
+            tri = center.triangle
+            for point in tri.points:
+                Neighbours.append(point.point)
+            for edge in tri.edges:
+                if not edge.drawn:
+                    for triangle in edge.edgeInTriangles:
+                        if triangle != tri:
+                            if [triangle.centroid.x, triangle.centroid.y] not in alreadyChosen:
+                                Neighbours.append([triangle.centroid.x, triangle.centroid.y])
         return Neighbours

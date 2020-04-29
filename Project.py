@@ -224,7 +224,7 @@ def updateEdges():
         pygame.draw.line(screen, red, sPos, ePos, 5)
 
 
-# Method for updating delaynay nodes
+# Method for updating delaunay nodes
 def updateCentroids():
     for [x, y] in centroids:
         pygame.draw.circle(screen, blue, (int(x), int(y)), centersize)
