@@ -332,8 +332,8 @@ while 1:
 
                                     lastPos = mousePos
                 for node in nodes:
-                    if [node.x, node.y] in neighbours:
-                        if nodeCollision(node, mousePos, "node"):
+                    if nodeCollision(node, mousePos, "node"):
+                        if [node.x, node.y] in neighbours:
                             if len(node.relations) < 3:
                                 if lastPos is not None:
                                     if lastPos != mousePos:
@@ -342,8 +342,8 @@ while 1:
                                         if len(chosenCenter) > 0:
                                             mid = chosenCenter[int(len(chosenCenter) / 2)]
                                         else:
-                                            mid = [int((lastPos[0] + mousePos[0]) / 2), int((lastPos[1] + mousePos[1]) / 2)]
-                                        addNode(int(mid[0]), int(mid[1]))
+                                            mid = [(lastPos[0] + mousePos[0]) / 2, (lastPos[1] + mousePos[1]) / 2]
+                                        addNode(mid[0], mid[1])
                                         tempEdge = []
 
                                         # Remove placeholder relation
