@@ -1,4 +1,3 @@
-
 class Point:
     def __init__(self, point):
         self.point = point
@@ -127,7 +126,16 @@ class Triangulation(Point, Edge, Triangle):
                 for point2 in connections[(i + 1):]:
                     for edgeConnect in point.pointInEdges:
                         if edgeConnect in point2.pointInEdges:
-                            self.addTriangle(pointAsPoint, point, point2)
+                            # Check if there are a point inside
+                            pInside = False
+                            for tri in edgeConnect.edgeInTriangles:
+                                for p in tri.points:
+                                    if p == point or p == point2:
+                                        continue
+                                    if p in connections:
+                                        pInside = self.pointInsideTriangle(point, point2, pointAsPoint, p)
+                            if not pInside:
+                                self.addTriangle(pointAsPoint, point, point2)
 
         self.allPoints.append(pointAsPoint)
 
@@ -188,7 +196,7 @@ class Triangulation(Point, Edge, Triangle):
             for i, c in enumerate(centroids):
                 if (i > 0):
                     c2 = c
-                    c1 = centroids[ i -1]
+                    c1 = centroids[i - 1]
                     # Find the edge that colide with the connection of the two centroids
                     for oldEdge in self.allEdges:
                         if self.doIntersect(c1, c2, oldEdge.start.point, oldEdge.end.point):
@@ -214,7 +222,6 @@ class Triangulation(Point, Edge, Triangle):
             newEdge = self.getEdge(pt1, pt2)
 
             newEdge.drawn = True
-
 
     def getTriangle(self, points):
         point1 = points[0]
@@ -260,6 +267,15 @@ class Triangulation(Point, Edge, Triangle):
         edge1.edgeInTriangles.append(newTriangle)
         edge2.edgeInTriangles.append(newTriangle)
         edge3.edgeInTriangles.append(newTriangle)
+
+    def pointInsideTriangle(self, p1, p2, p3, mid):
+        if (((p1.x > mid.x) and (p2.x > mid.x) and (p3.x > mid.x)) or
+                ((p1.x < mid.x) and (p2.x < mid.x) and (p3.x < mid.x)) or
+                ((p1.y > mid.y) and (p2.y > mid.y) and (p3.y > mid.y)) or
+                ((p1.y < mid.y) and (p2.y < mid.y) and (p3.y < mid.y))):
+            return False
+        else:
+            return True
 
     def getEdges(self, point1, point2, point3):
         edges = []

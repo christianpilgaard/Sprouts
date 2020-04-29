@@ -277,15 +277,25 @@ textRect.center = (w / 2, h / 8)
 screen.blit(background, (0, 0))
 screen.blit(text, textRect)
 
+
 # Initialize nodes
 startGame(6)
 dt = Triangulation()
 # Insert all startnodes one by one
+delauneyNodes.append([800, 800])
+delauneyNodes.append([800, 100])
+delauneyNodes.append([1, 800])
+delauneyNodes.append([1, 100])
+
+
 for s in delauneyNodes:
     dt.addPoint(s)
 centroids = dt.exportCentroids()
 updateCentroids()
 updateNodes()
+
+for dEdge in dt.allEdges:
+    pygame.draw.line(screen, gray, dEdge.start.point, dEdge.end.point, 5)
 
 # Game loop -----------------------------
 while 1:
@@ -314,6 +324,10 @@ while 1:
                             lastPos = mousePos
                             appendPos(tempEdge, mousePos)
                             neighbours = dt.exportNeighbours([node.x, node.y], "node", chosenCenter)
+                            for node2 in nodes:
+                                for n in neighbours:
+                                    if ([node2.x, node2.y] == n) and node2.locked:
+                                        neighbours.remove([node2.x, node2.y])
                             updateNeighbours()
             else:
                 for centerNode in centroids:
