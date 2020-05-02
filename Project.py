@@ -36,7 +36,6 @@ edges = []
 tempEdge = []
 
 # Triangulation related variables
-cornerNodes = []
 centroids = []
 chosenCenter = []
 centersize = 5
@@ -278,28 +277,21 @@ screen.blit(text, textRect)
 
 
 # Initialize nodes
-startGame(6)
+startGame(4)
 dt = Triangulation()
 # Insert all startnodes one by one
 for n in nodes:
     dt.addPoint([n.x, n.y])
-centroids = dt.exportCentroids()
 
 #Add corners
-cornerNodes.append([800, 800])
-cornerNodes.append([1, 100])
-cornerNodes.append([800, 100])
-cornerNodes.append([1, 800])
-
-for n in cornerNodes:
-    dt.addPoint(n)
-centroids = dt.exportCentroids()
+dt.addCornerNodes()
+centroids = dt.exportInCenters()
 
 updateCentroids()
 updateNodes()
 
 for dEdge in dt.allEdges:
-    pygame.draw.line(screen, gray, dEdge.start.point, dEdge.end.point, 5)
+    pygame.draw.line(screen, gray, dEdge.start.coordinates, dEdge.end.coordinates, 5)
 
 # Game loop -----------------------------
 while 1:
@@ -327,15 +319,8 @@ while 1:
                             drawing = True
                             lastPos = mousePos
                             appendPos(tempEdge, mousePos)
-                            neighbours = dt.exportNeighbours([node.x, node.y], "node", chosenCenter)
-                            for node2 in nodes:
-                                for n in neighbours:
-                                    if ([node2.x, node2.y] == n) and node2.locked:
-                                        neighbours.remove([node2.x, node2.y])
-                            for nd in cornerNodes:
-                                for n in neighbours:
-                                    if nd == n:
-                                        neighbours.remove(nd)
+                            neighbours = dt.exportNeighbours([node.x, node.y], "node", chosenCenter, [activeNode.x, activeNode.y])
+
                             updateNeighbours()
             else:
                 for centerNode in centroids:
@@ -347,18 +332,8 @@ while 1:
                                     chosenCenter.append(centerNode)
 
                                     neighbours.clear()
-                                    neighbours = dt.exportNeighbours(centerNode, "centerNode", chosenCenter)
-                                    #remove startnode, if there are only chosen 1 centroid = no loop
-                                    if ([activeNode.x, activeNode.y] in neighbours) and (len(chosenCenter) < 2):
-                                        neighbours.remove([activeNode.x, activeNode.y])
-                                    for node in nodes:
-                                        for n in neighbours:
-                                            if ([node.x, node.y] == n) and node.locked:
-                                                neighbours.remove([node.x, node.y])
-                                    for nd in cornerNodes:
-                                        for n in neighbours:
-                                            if nd == n:
-                                                neighbours.remove(nd)
+                                    neighbours = dt.exportNeighbours(centerNode, "centerNode", chosenCenter, [activeNode.x, activeNode.y])
+
                                     updateNodes()
                                     updateCentroids()
                                     updateNeighbours()
@@ -391,7 +366,7 @@ while 1:
                                         # Add new path and node
                                         dt.addPath([activeNode.x, activeNode.y], [node.x, node.y], chosenCenter, mid)
                                         # Update centroids
-                                        centroids = dt.exportCentroids()
+                                        centroids = dt.exportInCenters()
                                         chosenCenter.clear()
                                         neighbours.clear()
 
