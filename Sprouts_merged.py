@@ -2,7 +2,7 @@ import pygame, random, sys, math
 import numpy as np
 from pygame.locals import *
 from scipy.spatial import Delaunay
-from Triangulation_original import Triangulation
+from Triangulation import Triangulation
 
 # TODO
 # - Nodes NOT connecting to center, but to mousepos in node instead
