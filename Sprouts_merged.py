@@ -316,26 +316,29 @@ while 1:
                             # win detection
                             unlockedNodes = []
                             Check = True
-                            Done = False
+                            morePaths = False
                             for n in nodes:
+                                #If there are a node with more than one liberty it is sure that the game is not done
                                 if len(n.relations) < 2:
                                     Check = False
                                     break
                                 elif len(n.relations) < 3:
                                     unlockedNodes.append(n)
                             if Check:
+                                #Use of BFS to check if there are paths between unlocked nodes
                                 for i, uNode in enumerate(unlockedNodes):
-                                    if not i == 0:
+                                    for u2Node in unlockedNodes[i+1:]:
                                         paths = pathfinding(TriangulationLogic.dt,
-                                                            [unlockedNodes[i - 1].x, unlockedNodes[i - 1].y],
-                                                            [uNode.x, uNode.y]).paths
+                                                            [uNode.x, uNode.y],
+                                                            [u2Node.x, u2Node.y]).paths
                                         if len(paths) > 0:
-                                            Done = False
+                                            morePaths = True
                                             break
-                                        elif i == len(unlockedNodes) - 1:
-                                            Done = True
-                                if Done:
-                                    print("the game is done")
+                                    if morePaths:
+                                        break
+                                    #If morePaths = False and we have searched all connections then the game is done
+                                    elif i == len(unlockedNodes) - 1:
+                                        print("the game is done")
 
     view.updateScreen()
 
