@@ -1,6 +1,7 @@
 import pygame, sys
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
+import Sprouts
 
 mainClock = pygame.time.Clock()
 from pygame.locals import *
@@ -42,7 +43,7 @@ def main_menu():
         if button_1.collidepoint((mx,my)):
             pygame.draw.rect(screen, (0,150,0), button_1)
             if click:
-                import Sprouts
+                Sprouts.startGame(int(slider_no))
                 pass
                 # Sprouts(int(slider_no))
                 # Start simple game
@@ -115,10 +116,9 @@ def main_menu():
                 if event.button == 1:
                     click = True
                     hold = True
-            if event.type == MOUSEBUTTONUP:
-                if event.button == 1:
-                    hold = False
-                    slide_hold = False
+            if pygame.mouse.get_pressed()[0] == 0:
+                hold = False
+                slide_hold = False
 
         pygame.display.update()
         mainClock.tick(60)

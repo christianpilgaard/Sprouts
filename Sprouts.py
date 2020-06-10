@@ -2,7 +2,9 @@ import pygame, random, sys, math
 from pygame.locals import *
 
 # TODO
-# - Make fillBlank-method prettier
+# - Fix that you don't have to click twice on "back"-button
+# - Fix that nodes doesn't always connect when they are supposed to
+# - Fix "IndexError" with line: "addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))"
 
 # System related variables
 width = 800
@@ -15,12 +17,6 @@ red = 255, 0, 0
 green = 0, 255, 0
 blue = 0, 0, 255
 gray = 150, 150, 150
-
-# Drawing related variables
-drawing = False
-lastPos = None
-activeNode = None
-moved = False
 
 # Node related variables
 nodes = []
@@ -36,9 +32,6 @@ centroids = []
 edges = []
 edge = []
 tempEdge = []
-
-# Game related variables
-turn = 1
 
 
 # ------------------------------------------------
@@ -72,13 +65,20 @@ class Edge:
 
 # Method for setting up initial nodes
 def startGame(n):
+    screen.fill(white)
+    # create a rectangular object for the
+    # text surface object
+    w, h = pygame.display.get_surface().get_size()
     nodes.clear()
+    edges.clear()
     angle = 0
     for i in range(n):
         x = (width/4) * math.cos(angle*0.0174532925)
         y = (width/4) * math.sin(angle*0.0174532925)
         addNode((width/2)+x, (height/2)+y)
         angle += 360/n
+    updateScreen(1)
+    playGame(n)
 
 
 # Method for adding vertices
@@ -94,7 +94,7 @@ def appendPos(line, pos):
 
 
 # Method for checking whether a node
-def nodeCollision(node, mousePos):
+def nodeCollision(node, mousePos, moved):
 
     color = screen.get_at(pygame.mouse.get_pos())
     if color == black and moved:
@@ -113,7 +113,7 @@ def reverseNodeCollision(node, mousePos):
 
 
 # Method for getting active player
-def getPlayer():
+def getPlayer(turn):
     return turn % 2
 
 
@@ -199,7 +199,7 @@ def checkNodes(node1, node2):
 
 
 # Method for removing placeholder item
-def removePlaceholder():
+def removePlaceholder(activeItem):
     if activeItem is not None:
         if -1 in nodes.__getitem__(activeItem).relations:
             nodes.__getitem__(activeItem).relations.remove(-1)
@@ -226,13 +226,16 @@ def updateEdges():
 
 
 # Method updating screen
-def updateScreen():
+def updateScreen(turn):
     screen.fill(white)
-    if getPlayer() == 1:
-        text = font.render('1st player', True, green, blue)
+    if getPlayer(turn) == 1:
+        draw_text('Player 1', font_n, blue, screen, height/2, width/20)
     else:
-        text = font.render('2nd player', True, green, blue)
-    screen.blit(text, textRect)
+        draw_text('Player 2', font_n, red, screen, height/2, width/20)
+    pygame.draw.rect(screen, black, back_button)
+    draw_text('back', font_n, white, screen, 70, 45)
+    pygame.draw.rect(screen, black, restart_button)
+    draw_text('restart', font_n, white, screen, 190, 45)
     updateEdges()
     updateNodes()
 
@@ -250,6 +253,123 @@ def updateCentroids():
     for centroid in centroids:
         pygame.draw.circle(screen, blue, (int(centroid.x), int(centroid.y)), int(size/2))
 
+# Method for drawing text on the screen
+def draw_text(text, font, color, surface, x, y):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect()
+    textrect.center = (x, y)
+    surface.blit(textobj, textrect)
+
+
+def playGame(n):
+    # Drawing related variables
+    drawing = False
+    lastPos = None
+    activeNode = None
+    moved = False
+    tempEdge = []
+    # Game related variables
+    turn = 1
+    # Game loop -----------------------------
+    while 1:
+        for event in pygame.event.get():
+            mousePos = pygame.mouse.get_pos()
+
+            # Quit game
+            if event.type == QUIT:
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    return
+
+            # Select node -----------------------------
+            # Mouse 1 for drawing
+            elif event.type == MOUSEBUTTONDOWN:
+                for node in nodes:
+                    if nodeCollision(node, mousePos, moved):
+                        if len(node.relations) < 3:
+                            activeNode = node
+                            activeItem = node.id
+                            node.relations.append(-1)
+                            drawing = True
+                            lastPos = mousePos
+                            edges.append([])
+                if back_button.collidepoint(pygame.mouse.get_pos()):
+                    return
+                elif restart_button.collidepoint(pygame.mouse.get_pos()):
+                    startGame(n)
+
+            # Draw from node -----------------------------
+            if drawing:
+                drawing = checkCollision()
+                if lastPos is not None:
+                    if lastPos != mousePos:
+                        pygame.draw.line(screen, blue, lastPos, mousePos, 5)
+                        fillBlank(lastPos, mousePos)
+                        appendPos(tempEdge, mousePos)
+                lastPos = mousePos
+
+                # Check if any node or line is hit -----------------------------
+                # Avoid initially targeting active point
+                if not moved:
+                    if reverseNodeCollision(nodes.__getitem__(activeItem), mousePos):
+                        moved = True
+                else:
+                    # Check for hit detection while drawing
+                    for i, node in enumerate(nodes):
+                        if nodeCollision(node, mousePos, moved):
+                            if len(node.relations) < 3:
+                                # Append an edge connecting the nodes
+                                # Add new node on edge
+
+                                if checkEdge(tempEdge):
+                                    edges.append(tempEdge)
+                                    mid = int(len(tempEdge) / 2)
+                                    addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))
+                                    tempEdge = []
+
+                                    # Remove placeholder relation
+                                    nodes.__getitem__(activeItem).relations.remove(-1)
+
+                                    # Add relations between connected nodes
+                                    nodes.__getitem__(activeItem).relations.append(nodes[-1].id)
+                                    nodes.__getitem__(node.id).relations.append(nodes[-1].id)
+                                    nodes.__getitem__(-1).relations.append(activeItem)
+                                    nodes.__getitem__(-1).relations.append(node.id)
+                                    activeNode = None
+                                    activeItem = None
+
+                                    # Change turn
+                                    turn += 1
+
+                            # Reset current drawing
+                            lastPos = None
+                            moved = False
+                            drawing = False
+
+                            # Remove placeholder relation
+                            removePlaceholder(activeItem)
+
+                            # Update screen
+                            updateScreen(turn)
+
+                if not drawing:
+                    # Reset current drawing
+                    lastPos = None
+                    moved = False
+                    drawing = False
+                    tempEdge = []
+
+                    # Remove placeholder relation
+                    removePlaceholder(activeItem)
+
+                    # Update screen
+                    updateScreen(turn)
+
+        # Update
+        updateNodes()
+        updateCentroids()
+        pygame.display.update()
 
 # ------------------------------------------------
 # Initialize screen
@@ -261,124 +381,6 @@ background.fill(white)
 screen.blit(background, (0, 0))
 random.seed()
 
-# create a font object.
-# 1st parameter is the font file
-# which is present in pygame.
-# 2nd parameter is size of the font
-font = pygame.font.Font('freesansbold.ttf', 32)
-
-# create a text suface object,
-# on which text is drawn on it.
-text = font.render('1st player', True, green, blue)
-
-# create a rectangular object for the
-# text surface object
-textRect = text.get_rect()
-w, h = pygame.display.get_surface().get_size()
-textRect.center = (w/2, h/8)
-
-screen.blit(background, (0, 0))
-screen.blit(text, textRect)
-
-# Initialize nodes
-startGame(6)
-
-# addCentroid(nodes[0], nodes[1], nodes[2])
-
-# Game loop -----------------------------
-while 1:
-    for event in pygame.event.get():
-        mousePos = pygame.mouse.get_pos()
-
-        # Quit game
-        if event.type == QUIT:
-            sys.exit()
-        elif event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                sys.exit()
-
-        # Select node -----------------------------
-        # Mouse 1 for drawing
-        elif event.type == MOUSEBUTTONDOWN:
-            for node in nodes:
-                if nodeCollision(node, mousePos):
-                    if len(node.relations) < 3:
-                        print(node.id, " selected.")
-                        activeNode = node
-                        activeItem = node.id
-                        node.relations.append(-1)
-                        drawing = True
-                        lastPos = mousePos
-                        edges.append([])
-
-        # Draw from node -----------------------------
-        if drawing:
-            drawing = checkCollision()
-            if lastPos is not None:
-                if lastPos != mousePos:
-                    pygame.draw.line(screen, blue, lastPos, mousePos, 5)
-                    fillBlank(lastPos, mousePos)
-                    appendPos(tempEdge, mousePos)
-            lastPos = mousePos
-
-            # Check if any node or line is hit -----------------------------
-            # Avoid initially targeting active point
-            if not moved:
-                if reverseNodeCollision(nodes.__getitem__(activeItem), mousePos):
-                    moved = True
-            else:
-                # Check for hit detection while drawing
-                for i, node in enumerate(nodes):
-                    if nodeCollision(node, mousePos):
-                        if len(node.relations) < 3:
-                            # Append an edge connecting the nodes
-                            # Add new node on edge
-
-                            if checkEdge(tempEdge):
-                                edges.append(tempEdge)
-                                mid = int(len(tempEdge) / 2)
-                                addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))
-                                tempEdge = []
-
-                                # Remove placeholder relation
-                                nodes.__getitem__(activeItem).relations.remove(-1)
-
-                                # Add relations between connected nodes
-                                nodes.__getitem__(activeItem).relations.append(nodes[-1].id)
-                                nodes.__getitem__(node.id).relations.append(nodes[-1].id)
-                                nodes.__getitem__(-1).relations.append(activeItem)
-                                nodes.__getitem__(-1).relations.append(node.id)
-                                activeNode = None
-                                activeItem = None
-
-                                # Change turn
-                                turn += 1
-
-                        # Reset current drawing
-                        lastPos = None
-                        moved = False
-                        drawing = False
-
-                        # Remove placeholder relation
-                        removePlaceholder()
-
-                        # Update screen
-                        updateScreen()
-
-            if not drawing:
-                # Reset current drawing
-                lastPos = None
-                moved = False
-                drawing = False
-                tempEdge = []
-
-                # Remove placeholder relation
-                removePlaceholder()
-
-                # Update screen
-                updateScreen()
-
-    # Update
-    updateNodes()
-    updateCentroids()
-    pygame.display.update()
+font_n = pygame.font.SysFont(None, 40)
+back_button = pygame.Rect(20, 20, 100, 50)
+restart_button = pygame.Rect(140, 20, 100, 50)
