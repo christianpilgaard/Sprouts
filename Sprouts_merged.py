@@ -317,12 +317,12 @@ while 1:
                             unlockedNodes = []
                             Check = True
                             Done = False
-                            for node in nodes:
-                                if len(node.relations) < 2:
+                            for n in nodes:
+                                if len(n.relations) < 2:
                                     Check = False
                                     break
-                                elif len(node.relations) < 3:
-                                    unlockedNodes.append(node)
+                                elif len(n.relations) < 3:
+                                    unlockedNodes.append(n)
                             if Check:
                                 for i, uNode in enumerate(unlockedNodes):
                                     if not i == 0:
