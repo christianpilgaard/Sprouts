@@ -2,7 +2,7 @@ import pygame, random, sys, math
 from pygame.locals import *
 
 # TODO
-# - Fix that you don't have to click twice on "back"-button
+# - Fix that you don't have to click twice on "back"-button (Den ved at knappen klikkes på, men den returnerer fra noget andet)
 # - Fix that nodes doesn't always connect when they are supposed to
 # - Fix "IndexError" with line: "addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))"
 
@@ -68,7 +68,6 @@ def startGame(n):
     screen.fill(white)
     # create a rectangular object for the
     # text surface object
-    w, h = pygame.display.get_surface().get_size()
     nodes.clear()
     edges.clear()
     angle = 0
@@ -78,7 +77,7 @@ def startGame(n):
         addNode((width/2)+x, (height/2)+y)
         angle += 360/n
     updateScreen(1)
-    playGame(n)
+    return playGame(n)
 
 
 # Method for adding vertices
@@ -280,7 +279,7 @@ def playGame(n):
                 sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    return
+                    return 0
 
             # Select node -----------------------------
             # Mouse 1 for drawing
@@ -295,13 +294,12 @@ def playGame(n):
                             lastPos = mousePos
                             edges.append([])
                 if back_button.collidepoint(pygame.mouse.get_pos()):
-                    return
+                    return 0
                 elif restart_button.collidepoint(pygame.mouse.get_pos()):
-                    startGame(n)
+                    return 1
 
             # Draw from node -----------------------------
             if drawing:
-                drawing = checkCollision()
                 if lastPos is not None:
                     if lastPos != mousePos:
                         pygame.draw.line(screen, blue, lastPos, mousePos, 5)
@@ -312,6 +310,7 @@ def playGame(n):
                 # Check if any node or line is hit -----------------------------
                 # Avoid initially targeting active point
                 if not moved:
+                    pass
                     if reverseNodeCollision(nodes.__getitem__(activeItem), mousePos):
                         moved = True
                 else:
@@ -325,7 +324,7 @@ def playGame(n):
                                 if checkEdge(tempEdge):
                                     edges.append(tempEdge)
                                     mid = int(len(tempEdge) / 2)
-                                    addNode(int(tempEdge[mid][0]), int(tempEdge[mid][1]))
+                                    addNode(int(tempEdge[mid+1][0]), int(tempEdge[mid+1][1]))
                                     tempEdge = []
 
                                     # Remove placeholder relation
@@ -352,7 +351,7 @@ def playGame(n):
 
                             # Update screen
                             updateScreen(turn)
-
+                drawing = checkCollision()
                 if not drawing:
                     # Reset current drawing
                     lastPos = None

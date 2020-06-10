@@ -10,7 +10,7 @@ pygame.display.set_caption('Sprouts')
 screen = pygame.display.set_mode((800,800), 0, 32)
 
 font_h = pygame.font.SysFont(None, 100)
-font_n = pygame.font.SysFont(None, 20)
+font_n = pygame.font.SysFont(None, 24)
 
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
@@ -26,6 +26,7 @@ def main_menu():
     slider_text = 200
     slide_hold = False
     slider_no = '2'
+    error_text = ''
     while True:
 
         screen.fill((255,255,255))
@@ -40,16 +41,17 @@ def main_menu():
         button_2 = pygame.Rect(150, 370, 500, 100)
         button_3 = pygame.Rect(150, 505, 500, 100)
         button_4 = pygame.Rect(150, 640, 500, 100)
-        if button_1.collidepoint((mx,my)):
+        if button_1.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_1)
             if click:
-                Sprouts.startGame(int(slider_no))
-                pass
+                play = 1
+                while play:
+                    play = Sprouts.startGame(int(slider_no))
                 # Sprouts(int(slider_no))
                 # Start simple game
         else:
             pygame.draw.rect(screen, (0,0,0), button_1)
-        if button_2.collidepoint((mx,my)):
+        if button_2.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_2)
             if click:
                 pass
@@ -57,23 +59,23 @@ def main_menu():
                 # Start advanced game
         else:
             pygame.draw.rect(screen, (0,0,0), button_2)
-        if button_3.collidepoint((mx,my)):
+        if button_3.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_3)
             if click:
                 pass
                 # Start AI game
         else:
             pygame.draw.rect(screen, (0,0,0), button_3)
-        if button_4.collidepoint((mx,my)):
+        if button_4.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_4)
             if click:
-                getFile()
+                error_text = getFile()
         else:
             pygame.draw.rect(screen, (0,0,0), button_4)
-        if slider_circle.collidepoint((mx,my)):
+        if slider_circle.collidepoint((mx,my)) and error_text == '':
             if hold:
                 slide_hold = True
-        if slide_hold:
+        if (slide_hold or (slider_base.collidepoint((mx,my)) and click)) and error_text == '':
             if mx<200:
                 circle_rect = (200-10, 175)
                 circle_center = (200, 180)
@@ -103,6 +105,21 @@ def main_menu():
         draw_text(slider_no, font_n, (0,0,0), screen, slider_text, 150)
         draw_text('No. of nodes:', font_n, (0,0,0), screen, 120, 180)
 
+        if not error_text == '':
+            error_frame = pygame.Rect(195, 295, 410, 210)
+            error = pygame.Rect(200, 300, 400, 200)
+            error_button = pygame.Rect(350, 425, 100, 50)
+            pygame.draw.rect(screen, (0,0,0), error_frame)
+            pygame.draw.rect(screen, (255,255,255), error)
+            if error_button.collidepoint((mx,my)):
+                pygame.draw.rect(screen, (0,150,0), error_button)
+                if click:
+                    error_text = ''
+            else:
+                pygame.draw.rect(screen, (0,0,0), error_button)
+            draw_text(error_text, font_n, (0,0,0), screen, 400, 350)
+            draw_text('Close', font_n, (255,255,255), screen, 400, 450)
+
         click = False
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -126,19 +143,21 @@ def main_menu():
 # Select a file and run it if it's a valid txt-file
 def getFile():
     Tk().withdraw()
-    while True:
-        filename = askopenfilename()
-        if filename[-4:] == '.txt' or filename == '':
-            break
+    filename = askopenfilename()
+    if filename == '':
+        return ''
+    elif filename[-4:] != '.txt':
+        return 'Expected a txt-file.'
     try:
         with open(filename, 'r') as f:
             lines = [line.rstrip() for line in f]
             if checkValidFile(lines):
                 pass # start txt-file version
             else:
-                pass # Show the player some kind of error
+                return 'Unexpected file content format.'
     except:
         pass
+    return ''
 
 # Checks the validity of a txt-file
 def checkValidFile(text):
