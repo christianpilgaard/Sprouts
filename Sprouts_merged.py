@@ -3,6 +3,7 @@ import numpy as np
 from pygame.locals import *
 from scipy.spatial import Delaunay
 from Triangulation import Triangulation
+from BFS import pathfinding
 
 # TODO
 # - Nodes NOT connecting to center, but to mousepos in node instead
@@ -75,7 +76,7 @@ class GameController:
     # Method for clearing stored nodes and centroids
     def clearGame(self):
         nodes.clear()
-        tempCentroids.clear()
+        #tempCentroids.clear()
 
 
 # ------------------------------------------------
@@ -274,6 +275,15 @@ while 1:
                         if [node.x, node.y] in triLogic.neighbours:
                             if len(node.relations) < 3:
                                 edges.append([activePos, [node.x, node.y]])
+                                """
+                                paths = pathfinding(TriangulationLogic.dt, [activeNode.x, activeNode.y], [node.x, node.y]).paths
+                                for path in paths:
+                                    print(path)
+                                    for i, p in enumerate(path):
+                                        if not i == 0:
+                                            edges.append([path[i-1], p])
+                                print(len(paths))
+                                """
 
                                 if len(triLogic.chosenCenter) > 0:
                                     mid = triLogic.chosenCenter[int(len(triLogic.chosenCenter) / 2)]
@@ -302,6 +312,30 @@ while 1:
 
                             # Remove placeholder relation
                             removePlaceholder()
+
+                            # win detection
+                            unlockedNodes = []
+                            Check = True
+                            Done = False
+                            for node in nodes:
+                                if len(node.relations) < 2:
+                                    Check = False
+                                    break
+                                elif len(node.relations) < 3:
+                                    unlockedNodes.append(node)
+                            if Check:
+                                for i, uNode in enumerate(unlockedNodes):
+                                    if not i == 0:
+                                        paths = pathfinding(TriangulationLogic.dt,
+                                                            [unlockedNodes[i - 1].x, unlockedNodes[i - 1].y],
+                                                            [uNode.x, uNode.y]).paths
+                                        if len(paths) > 0:
+                                            Done = False
+                                            break
+                                        elif i == len(unlockedNodes) - 1:
+                                            Done = True
+                                if Done:
+                                    print("the game is done")
 
     view.updateScreen()
 
