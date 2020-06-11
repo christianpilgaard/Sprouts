@@ -55,7 +55,7 @@ def main_menu():
         if button_2.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_2)
             if click:
-                Sprouts_merged.playGame(int(slider_no))
+                Sprouts_merged.playGame(int(slider_no), False, [])
         else:
             pygame.draw.rect(screen, (0,0,0), button_2)
         if button_3.collidepoint((mx,my)) and error_text == '':
@@ -151,7 +151,7 @@ def getFile():
         with open(filename, 'r') as f:
             lines = [line.rstrip() for line in f]
             if checkValidFile(lines):
-                pass # start txt-file version
+                Sprouts_merged.playGame(int(lines[0]), True, lines[1:]) # start txt-file version
             else:
                 return 'Unexpected file content format.'
     except:
