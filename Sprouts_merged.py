@@ -1,17 +1,13 @@
 import pygame, random, sys, math
 import numpy as np
 from pygame.locals import *
-from scipy.spatial import Delaunay
 from Triangulation import Triangulation
+from graphSearch import *
 from BFS import pathfinding
-# from graphSearch import *
-
-# TODO
-# - Nodes NOT connecting to center, but to mousepos in node instead
 
 
-# ------------------------------------------------
-# Node class for initializing and operating on vertices
+# -------------------- ----------------------------
+# System class
 class System:
 
     # System related variables
@@ -48,6 +44,7 @@ class Node:
         self.relations = relations
         self.locked = locked
         self.selected = selected
+        self.pos = [self.x, self.y]
 
 
 # ------------------------------------------------
@@ -65,20 +62,78 @@ class Centroid:
 # Game controller class
 class GameController:
 
+    # Node related variables
+    nodes = []
+    size = 10
+    edges = []
+
+    # Drawing related variables
+    activeNode = None
+    activeItem = None
+    activePos = None
+
+    # Method for adding vertices
+    def addNode(self, x, y):
+        v = Node(len(self.nodes), x, y, [], False, False)
+        self.nodes.append(v)
+
+    def getNodes(self):
+        return self.nodes
+
+    def getEdges(self):
+        return self.edges
+
+    def setActiveNode(self, node):
+        self.activeNode = node
+
+    def getActiveNode(self):
+        return self.activeNode
+
+    def setActiveItem(self, item):
+        self.activeItem = item
+
+    def getActiveItem(self):
+        return self.activeItem
+
+    def setActivePos(self, pos):
+        self.activePos = pos
+
+    def getActivePos(self):
+        return self.activePos
+
+    def resetGame(self):
+        self.nodes.clear()
+        self.edges.clear()
+        self.activePos = None
+        self.activeItem = None
+        self.activeNode = None
+
     # Method for setting up initial nodes
     def startGame(self, n):
-        nodes.clear()
+        self.nodes.clear()
         angle = 0
         for i in range(n):
             x = (system.width / 3.5) * math.cos(angle * 0.0174532925)
             y = (system.width / 3.5) * math.sin(angle * 0.0174532925)
-            addNode((system.width / 2) + x, (system.height / 2) + y)
+            self.addNode((system.width / 2) + x, (system.height / 2) + y)
             angle += 360 / n
 
-    # Method for clearing stored nodes and centroids
-    def clearGame(self):
-        nodes.clear()
-        #tempCentroids.clear()
+    # Method for checking whether a node
+    def nodeCollision(self, node, mousePos, type):
+        if type == "node":
+            if not ((abs(mousePos[0] - node.x)) < self.size) & ((abs(mousePos[1] - node.y)) < self.size):
+                return False
+            return True
+        else:
+            if not ((abs(mousePos[0] - node[0])) < self.size) & ((abs(mousePos[1] - node[1])) < self.size):
+                return False
+            return True
+
+    # Method for removing placeholder item
+    def removePlaceholder(self):
+        if self.getActiveItem() is not None:
+            if -1 in self.getNodes().__getitem__(self.getActiveItem()).relations:
+                self.nodes.__getitem__(self.getActiveItem()).relations.remove(-1)
 
 
 # ------------------------------------------------
@@ -91,15 +146,22 @@ class TriangulationLogic:
     centroids = []
     chosenCenter = []
     neighbours = []
+    centersize = 8
 
     def initializeTriangulation(self):
         # Insert nodes
-        for n in nodes:
+        for n in controller.getNodes():
             self.dt.addPoint([n.x, n.y])
 
         # Add corners
         self.dt.addCornerNodes()
         self.centroids = self.dt.exportInCenters()
+
+    def getCentroids(self):
+        return self.centroids
+
+    def getCentersize(self):
+        return self.centersize
 
     def updateCentroids(self):
         self.centroids = self.dt.exportInCenters()
@@ -110,75 +172,11 @@ class TriangulationLogic:
     def clearChosenCenter(self):
         self.chosenCenter.clear()
 
-
-# ------------------------------------------------
-# Game controller class
-class GraphLogic:
-
-    # graph = Graph()
-    points = []
-
-    # Method for adding points for transversable graph
-    def addPoints(self, x, y):
-        v = Node(len(self.points), x, y, [], False, False)
-        self.points.append(v)
-
-    def getPoints(self):
-        for p in self.points:
-            print(p.id, p.x, p.y)
-
-    def getTransversableNodes(self, startNode, endNode):
-        graphNodes = []
-        i = 0
-        self.addPoints(startNode.x, startNode.y)
-        self.addPoints(endNode.x, endNode.y)
-        for cen in triLogic.getCentroids():
-            if [cen[0], cen[1]] not in graphNodes:
-                self.addPoints(cen[0], cen[1])
-
-    def getTranversingEdges(self):
-        graphEdges = []
-
-        for node in triLogic.dt.allPoints:
-            if node.connectable:
-                coords = node.coordinates
-                for neighbour in triLogic.dt.exportNeighbours(coords, "node", [], True):
-                    a = self.neighbourToNode(neighbour)
-                    n = self.neighbourToNode([node.x, node.y])
-                    if [n, a] not in graphEdges:
-                        graphEdges.append([n, a])
-
-        for cen in triLogic.getCentroids():
-            for neighbour in triLogic.dt.exportNeighbours(cen, "centerNode", [], True):
-                c = self.neighbourToNode(cen)
-                n = self.neighbourToNode(neighbour)
-                if [c, n] not in graphEdges:
-                    graphEdges.append([c, n])
-
-        return graphEdges
-
-    def getTranversingEdges2(self):
-        graphEdges = []
-
-        for node in self.points:
-            for neighbour in triLogic.dt.exportNeighbours(node.pos, "node", [], True):
-                if neigh in self.points:
-                    if [node, neigh] not in graphEdges:
-                        graphEdges.append([node, neigh])
-
-        for cen in triLogic.getCentroids():
-            for neighbour in triLogic.dt.exportNeighbours(cen, "centerNode", [], True):
-                c = self.neighbourToNode(cen)
-                n = self.neighbourToNode(neighbour)
-                if [c, n] not in graphEdges:
-                    graphEdges.append([c, n])
-
-        return graphEdges
-
-    def neighbourToNode(self, neighbour):
-        for p in self.points:
-            if neighbour == [p.x, p.y]:
-                return p
+    def resetGame(self):
+        self.centroids.clear()
+        self.chosenCenter.clear()
+        self.neighbours.clear()
+        self.dt.resetTriangulation()
 
 
 # ------------------------------------------------
@@ -187,22 +185,22 @@ class GameView:
 
     # Method for updating nodes
     def updateNodes(self):
-        for node in nodes:
+        for node in controller.getNodes():
             if len(node.relations) == 3:
-                pygame.draw.circle(system.screen, system.green, (int(node.x), int(node.y)), size)
+                pygame.draw.circle(system.screen, system.green, (int(node.x), int(node.y)), controller.size)
             else:
-                pygame.draw.circle(system.screen, system.black, (int(node.x), int(node.y)), size)
+                pygame.draw.circle(system.screen, system.black, (int(node.x), int(node.y)), controller.size)
 
     # Method for updating edges
     def updateEdges(self):
         #  for edge in edges:
-        for [sPos, ePos] in edges:
+        for [sPos, ePos] in controller.getEdges():
             pygame.draw.line(system.screen, system.red, sPos, ePos, 5)
 
     # Method for updating delaunay nodes
     def updateCentroids(self):
         for [x, y] in triLogic.centroids:
-            pygame.draw.circle(system.screen, system.blue, (int(x), int(y)), centersize)
+            pygame.draw.circle(system.screen, system.blue, (int(x), int(y)), triLogic.getCentersize())
 
     def updateTriLines(self):
         for dEdge in triLogic.dt.allEdges:
@@ -210,7 +208,7 @@ class GameView:
 
     def updateNeighbours(self):
         for [x, y] in triLogic.neighbours:
-            pygame.draw.circle(system.screen, system.red, (int(x), int(y)), centersize)
+            pygame.draw.circle(system.screen, system.red, (int(x), int(y)), triLogic.getCentersize())
 
     def updateGraphEdges(self, graphEdges):
         if len(graphEdges) != 0:
@@ -234,46 +232,97 @@ class GameView:
         view.updateNodes()
 
 
-# ------------------------------------------------
-# Method for adding vertices
-def addNode(x, y):
-    v = Node(len(nodes), x, y, [], False, False)
-    nodes.append(v)
+# -------------------------------------------------------------------
+# --------------------------- MAIN GAME -----------------------------
+# -------------------------------------------------------------------
+def playGame(amount):
+    # Initialize game
+    system.init()
+    controller.startGame(amount)
+    triLogic.initializeTriangulation()
 
+    # Game loop -----------------------------
+    while 1:
+        for event in pygame.event.get():
+            mousePos = pygame.mouse.get_pos()
 
-# Method for appending position to line
-def appendPos(line, pos):
-    line.append(pos)
+            # Quit game
+            if event.type == QUIT:
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    sys.exit()
+                elif event.key == K_BACKSPACE:
+                    controller.resetGame()
+                    triLogic.resetGame()
+                    return
 
+            # Mouse action -----------------------------
+            elif event.type == MOUSEBUTTONDOWN:
 
-# Method for checking whether a node
-def nodeCollision(node, mousePos, type):
-    color = system.screen.get_at(pygame.mouse.get_pos())
-    if color == system.black and moved:
-        return False
-    if type == "node":
-        if not ((abs(mousePos[0] - node.x)) < margin) & ((abs(mousePos[1] - node.y)) < margin):
-            return False
-        return True
-    else:
-        if not ((abs(mousePos[0] - node[0])) < margin) & ((abs(mousePos[1] - node[1])) < margin):
-            return False
-        return True
+                # No active node ------------------------
+                if controller.getActivePos() is None:
+                    for node in controller.getNodes():
+                        if controller.nodeCollision(node, mousePos, "node"):
+                            if len(node.relations) < 3:
+                                controller.setActiveNode(node)
+                                controller.setActiveItem(node.id)
+                                controller.setActivePos([controller.getActiveNode().x, controller.getActiveNode().y])
+                                node.relations.append(-1)
+                                triLogic.neighbours = triLogic.dt.exportNeighbours([node.x, node.y], "node", triLogic.chosenCenter, [controller.getActiveNode().x, controller.getActiveNode().y])
 
+                # Active node ---------------------------
+                if controller.getActivePos() is not None:
 
-# Method for checking a position has reached a certain distance away from a node
-def reverseNodeCollision(node, mousePos):
-    if not ((abs(mousePos[0] - node.x)) > size) & ((abs(mousePos[1] - node.y)) > size):
-        return False
-    return True
+                    # Select centroid -------------------
+                    for centerNode in triLogic.centroids:
+                        if centerNode in triLogic.neighbours:
+                            if controller.nodeCollision(centerNode, mousePos, "centerNode"):
+                                controller.edges.append([controller.getActivePos(), centerNode])
+                                controller.setActivePos(centerNode)
+                                triLogic.chosenCenter.append(centerNode)
 
+                                triLogic.neighbours.clear()
+                                triLogic.neighbours = triLogic.dt.exportNeighbours(centerNode,
+                                        "centerNode", triLogic.chosenCenter, [controller.getActiveNode().x, controller.getActiveNode().y])
 
-# Method for removing placeholder item
-def removePlaceholder():
-    if activeItem is not None:
-        if -1 in nodes.__getitem__(activeItem).relations:
-            nodes.__getitem__(activeItem).relations.remove(-1)
+                    # Select end node ------------------
+                    for node in controller.getNodes():
+                        if controller.nodeCollision(node, mousePos, "node"):
+                            if [node.x, node.y] in triLogic.neighbours:
+                                if len(node.relations) < 3:
+                                    controller.edges.append([controller.getActivePos(), [node.x, node.y]])
 
+                                    if len(triLogic.chosenCenter) > 0:
+                                        mid = triLogic.chosenCenter[int(len(triLogic.chosenCenter) / 2)]
+                                    else:
+                                        mid = [(controller.getActivePos()[0] + mousePos[0]) / 2, (controller.getActivePos()[1] + mousePos[1]) / 2]
+                                    controller.addNode(mid[0], mid[1])
+
+                                    # Remove placeholder relation
+                                    controller.nodes.__getitem__(controller.getActiveItem()).relations.remove(-1)
+
+                                    # Add relations between connected nodes
+                                    controller.nodes.__getitem__(controller.getActiveItem()).relations.append(controller.nodes[-1].id)
+                                    controller.nodes.__getitem__(node.id).relations.append(controller.nodes[-1].id)
+                                    controller.nodes.__getitem__(-1).relations.append(controller.getActiveItem())
+                                    controller.nodes.__getitem__(-1).relations.append(node.id)
+
+                                    # Add new path and node
+                                    triLogic.dt.addPath([controller.getActiveNode().x, controller.getActiveNode().y], [node.x, node.y], triLogic.chosenCenter, mid)
+                                    triLogic.updateCentroids()
+                                    triLogic.clearChosenCenter()
+                                    triLogic.clearNeighbours()
+
+                                    controller.setActiveNode(None)
+                                    controller.setActivePos(None)
+                                    controller.setActiveItem(None)
+
+                                # Remove placeholder relation
+                                controller.removePlaceholder()
+
+        view.updateScreen()
+        pygame.display.update()
 
 # ------------------------------------------------
 # Initialize classes
@@ -281,157 +330,3 @@ view = GameView()
 system = System()
 controller = GameController()
 triLogic = TriangulationLogic()
-# graphLogic = GraphLogic()
-
-# Node related variables
-nodes = []
-size = 10
-margin = size
-
-# Edge related variables
-edges = []
-
-# Drawing related variables
-activeNode = None
-activeItem = None
-moved = False
-activePos = None
-
-# Triangulation related variables
-centersize = 8
-
-# Initialize game
-system.init()
-controller.startGame(4)
-triLogic.initializeTriangulation()
-
-# TEST VARIABLES
-space = False
-path = []
-
-# Game loop -----------------------------
-while 1:
-    for event in pygame.event.get():
-        mousePos = pygame.mouse.get_pos()
-
-        # Quit game
-        if event.type == QUIT:
-            sys.exit()
-        elif event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                sys.exit()
-            if event.key == K_SPACE:
-                space = True
-                system.screen.fill(system.white)
-            if event.key == K_BACKSPACE:
-                space = False
-
-        # Mouse action -----------------------------
-        elif event.type == MOUSEBUTTONDOWN:
-
-            # No active node ------------------------
-            if activePos is None:
-                for node in nodes:
-                    if nodeCollision(node, mousePos, "node"):
-                        if len(node.relations) < 3:
-                            activeNode = node
-                            activeItem = node.id
-                            activePos = [activeNode.x, activeNode.y]
-                            node.relations.append(-1)
-                            triLogic.neighbours = triLogic.dt.exportNeighbours([node.x, node.y], "node", triLogic.chosenCenter, [activeNode.x, activeNode.y])
-
-            # Active node ---------------------------
-            if activePos is not None:
-
-                # Select centroid -------------------
-                for centerNode in triLogic.centroids:
-                    if centerNode in triLogic.neighbours:
-                        if nodeCollision(centerNode, mousePos, "centerNode"):
-                            edges.append([activePos, centerNode])
-                            activePos = centerNode
-                            triLogic.chosenCenter.append(centerNode)
-
-                            triLogic.neighbours.clear()
-                            triLogic.neighbours = triLogic.dt.exportNeighbours(centerNode,
-                                    "centerNode", triLogic.chosenCenter, [activeNode.x, activeNode.y])
-
-                # Select end node ------------------
-                for node in nodes:
-                    if nodeCollision(node, mousePos, "node"):
-                        if [node.x, node.y] in triLogic.neighbours:
-                            if len(node.relations) < 3:
-                                edges.append([activePos, [node.x, node.y]])
-                                """
-                                paths = pathfinding(TriangulationLogic.dt, [activeNode.x, activeNode.y], [node.x, node.y]).paths
-                                for path in paths:
-                                    print(path)
-                                    for i, p in enumerate(path):
-                                        if not i == 0:
-                                            edges.append([path[i-1], p])
-                                print(len(paths))
-                                """
-
-                                if len(triLogic.chosenCenter) > 0:
-                                    mid = triLogic.chosenCenter[int(len(triLogic.chosenCenter) / 2)]
-                                else:
-                                    mid = [(activePos[0] + mousePos[0]) / 2, (activePos[1] + mousePos[1]) / 2]
-                                addNode(mid[0], mid[1])
-
-                                # Remove placeholder relation
-                                nodes.__getitem__(activeItem).relations.remove(-1)
-
-                                # Add relations between connected nodes
-                                nodes.__getitem__(activeItem).relations.append(nodes[-1].id)
-                                nodes.__getitem__(node.id).relations.append(nodes[-1].id)
-                                nodes.__getitem__(-1).relations.append(activeItem)
-                                nodes.__getitem__(-1).relations.append(node.id)
-
-                                # Add new path and node
-                                triLogic.dt.addPath([activeNode.x, activeNode.y], [node.x, node.y], triLogic.chosenCenter, mid)
-                                triLogic.updateCentroids()
-                                triLogic.clearChosenCenter()
-                                triLogic.clearNeighbours()
-
-                                activeNode = None
-                                activePos = None
-                                activeItem = None
-
-                            # Remove placeholder relation
-                            removePlaceholder()
-
-                            # win detection
-                            unlockedNodes = []
-                            Check = True
-                            morePaths = False
-                            for n in nodes:
-                                # If there are a node with more than one liberty it is sure that the game is not done
-                                if len(n.relations) < 2:
-                                    Check = False
-                                    break
-                                elif len(n.relations) < 3:
-                                    unlockedNodes.append(n)
-                            if Check:
-                                # Use of BFS to check if there are paths between unlocked nodes
-                                for i, uNode in enumerate(unlockedNodes):
-                                    for u2Node in unlockedNodes[i+1:]:
-                                        paths = pathfinding(TriangulationLogic.dt,
-                                                            [uNode.x, uNode.y],
-                                                            [u2Node.x, u2Node.y]).paths
-                                        if len(paths) > 0:
-                                            morePaths = True
-                                            break
-                                    if morePaths:
-                                        break
-                                    # If morePaths = False and we have searched all connections then the game is done
-                                    elif i == len(unlockedNodes) - 1:
-                                        print("the game is done")
-
-    view.updateScreen()
-
-    # Update every iteration
-    if space is True:
-        system.screen.fill(system.white)
-        view.updateNodes()
-        view.updateEdges()
-
-    pygame.display.update()
