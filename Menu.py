@@ -2,6 +2,7 @@ import pygame, sys
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 import Sprouts
+import Sprouts_merged
 
 mainClock = pygame.time.Clock()
 from pygame.locals import *
@@ -54,9 +55,7 @@ def main_menu():
         if button_2.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_2)
             if click:
-                pass
-                # Sprouts_Tri(int(slider_no))
-                # Start advanced game
+                Sprouts_merged.playGame(int(slider_no))
         else:
             pygame.draw.rect(screen, (0,0,0), button_2)
         if button_3.collidepoint((mx,my)) and error_text == '':
@@ -92,9 +91,6 @@ def main_menu():
                 slider_text = mx
                 slider_no = str(int(round((mx - 200) / 27.78))+2)
 
-
-
-
         # Draw objects
         pygame.draw.rect(screen, (0,0,0), slider_base)
         pygame.draw.circle(screen, (0,150,0), circle_center, 20)
@@ -129,6 +125,9 @@ def main_menu():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                elif event.key == K_SPACE:
+                    print("test")
+
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
