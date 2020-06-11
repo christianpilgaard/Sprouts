@@ -236,6 +236,8 @@ class GameView:
 # --------------------------- MAIN GAME -----------------------------
 # -------------------------------------------------------------------
 def playGame(amount):
+    controller.resetGame()
+    triLogic.resetGame()
     # Initialize game
     system.init()
     controller.startGame(amount)
@@ -253,8 +255,6 @@ def playGame(amount):
                 if event.key == K_ESCAPE:
                     sys.exit()
                 elif event.key == K_BACKSPACE:
-                    controller.resetGame()
-                    triLogic.resetGame()
                     return
 
             # Mouse action -----------------------------
