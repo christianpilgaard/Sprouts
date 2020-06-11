@@ -4,9 +4,11 @@ from pygame.locals import *
 from scipy.spatial import Delaunay
 from Triangulation import Triangulation
 from BFS import pathfinding
+# from graphSearch import *
 
 # TODO
 # - Nodes NOT connecting to center, but to mousepos in node instead
+
 
 # ------------------------------------------------
 # Node class for initializing and operating on vertices
@@ -110,6 +112,76 @@ class TriangulationLogic:
 
 
 # ------------------------------------------------
+# Game controller class
+class GraphLogic:
+
+    # graph = Graph()
+    points = []
+
+    # Method for adding points for transversable graph
+    def addPoints(self, x, y):
+        v = Node(len(self.points), x, y, [], False, False)
+        self.points.append(v)
+
+    def getPoints(self):
+        for p in self.points:
+            print(p.id, p.x, p.y)
+
+    def getTransversableNodes(self, startNode, endNode):
+        graphNodes = []
+        i = 0
+        self.addPoints(startNode.x, startNode.y)
+        self.addPoints(endNode.x, endNode.y)
+        for cen in triLogic.getCentroids():
+            if [cen[0], cen[1]] not in graphNodes:
+                self.addPoints(cen[0], cen[1])
+
+    def getTranversingEdges(self):
+        graphEdges = []
+
+        for node in triLogic.dt.allPoints:
+            if node.connectable:
+                coords = node.coordinates
+                for neighbour in triLogic.dt.exportNeighbours(coords, "node", [], True):
+                    a = self.neighbourToNode(neighbour)
+                    n = self.neighbourToNode([node.x, node.y])
+                    if [n, a] not in graphEdges:
+                        graphEdges.append([n, a])
+
+        for cen in triLogic.getCentroids():
+            for neighbour in triLogic.dt.exportNeighbours(cen, "centerNode", [], True):
+                c = self.neighbourToNode(cen)
+                n = self.neighbourToNode(neighbour)
+                if [c, n] not in graphEdges:
+                    graphEdges.append([c, n])
+
+        return graphEdges
+
+    def getTranversingEdges2(self):
+        graphEdges = []
+
+        for node in self.points:
+            for neighbour in triLogic.dt.exportNeighbours(node.pos, "node", [], True):
+                if neigh in self.points:
+                    if [node, neigh] not in graphEdges:
+                        graphEdges.append([node, neigh])
+
+        for cen in triLogic.getCentroids():
+            for neighbour in triLogic.dt.exportNeighbours(cen, "centerNode", [], True):
+                c = self.neighbourToNode(cen)
+                n = self.neighbourToNode(neighbour)
+                if [c, n] not in graphEdges:
+                    graphEdges.append([c, n])
+
+        return graphEdges
+
+    def neighbourToNode(self, neighbour):
+        for p in self.points:
+            if neighbour == [p.x, p.y]:
+                return p
+
+
+# ------------------------------------------------
 # Game view class
 class GameView:
 
@@ -139,6 +211,18 @@ class GameView:
     def updateNeighbours(self):
         for [x, y] in triLogic.neighbours:
             pygame.draw.circle(system.screen, system.red, (int(x), int(y)), centersize)
+
+    def updateGraphEdges(self, graphEdges):
+        if len(graphEdges) != 0:
+            for edge in graphEdges:
+                print(edge[0].pos, edge[1].pos)
+                # pygame.draw.line(system.screen, system.green, edge[0].pos, edge[1].pos, 5)
+
+    def updatePath(self, path):
+        if len(path) != 0:
+            for i in range(len(path)):
+                if i+1 < len(path):
+                    pygame.draw.line(system.screen, system.blue, path[i], path[i+1], 5)
 
     # Method updating screen
     def updateScreen(self):
@@ -197,6 +281,7 @@ view = GameView()
 system = System()
 controller = GameController()
 triLogic = TriangulationLogic()
+# graphLogic = GraphLogic()
 
 # Node related variables
 nodes = []
@@ -222,6 +307,7 @@ triLogic.initializeTriangulation()
 
 # TEST VARIABLES
 space = False
+path = []
 
 # Game loop -----------------------------
 while 1:
@@ -318,14 +404,14 @@ while 1:
                             Check = True
                             morePaths = False
                             for n in nodes:
-                                #If there are a node with more than one liberty it is sure that the game is not done
+                                # If there are a node with more than one liberty it is sure that the game is not done
                                 if len(n.relations) < 2:
                                     Check = False
                                     break
                                 elif len(n.relations) < 3:
                                     unlockedNodes.append(n)
                             if Check:
-                                #Use of BFS to check if there are paths between unlocked nodes
+                                # Use of BFS to check if there are paths between unlocked nodes
                                 for i, uNode in enumerate(unlockedNodes):
                                     for u2Node in unlockedNodes[i+1:]:
                                         paths = pathfinding(TriangulationLogic.dt,
@@ -336,7 +422,7 @@ while 1:
                                             break
                                     if morePaths:
                                         break
-                                    #If morePaths = False and we have searched all connections then the game is done
+                                    # If morePaths = False and we have searched all connections then the game is done
                                     elif i == len(unlockedNodes) - 1:
                                         print("the game is done")
 
