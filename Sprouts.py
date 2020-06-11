@@ -25,9 +25,6 @@ lockedNodes = []
 size = 20
 margin = size
 
-# Centroid related variables
-centroids = []
-
 # Edge related variables
 edges = []
 edge = []
@@ -43,25 +40,6 @@ class Node:
         self.y = y
         self.relations = relations
         self.locked = locked
-
-
-# ------------------------------------------------
-# Node class for initializing and operating on vertices
-class Centroid:
-    def __init__(self, id, x, y, points):
-        self.id = id
-        self.x = x
-        self.y = y
-        self.points = points
-
-
-# ------------------------------------------------
-# Edge class for initializing and operating on edges
-class Edge:
-    def __init__(self, pos, relations):
-        self.pos = pos
-        self.relations = relations
-
 
 # Method for setting up initial nodes
 def startGame(n):
@@ -238,20 +216,6 @@ def updateScreen(turn):
     updateEdges()
     updateNodes()
 
-
-# Method updating screen
-def addCentroid(a, b, c):
-    o_x = (a.x + b.x + c.x)/3
-    o_y = (a.y + b.y + c.y)/3
-    p = Centroid(len(centroids), o_x, o_y, [a,b,c])
-    centroids.append(p)
-
-
-# Method for updating nodes
-def updateCentroids():
-    for centroid in centroids:
-        pygame.draw.circle(screen, blue, (int(centroid.x), int(centroid.y)), int(size/2))
-
 # Method for drawing text on the screen
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
@@ -367,7 +331,6 @@ def playGame(n):
 
         # Update
         updateNodes()
-        updateCentroids()
         pygame.display.update()
 
 # ------------------------------------------------
