@@ -124,6 +124,7 @@ class GameController:
         self.activePos = None
         self.activeItem = None
         self.activeNode = None
+        self.error = False
         self.done = False
         self.turn = 1
 
