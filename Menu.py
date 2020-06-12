@@ -164,13 +164,10 @@ def getFile():
 def checkValidFile(text):
     for i, line in enumerate(text):
         if i == 0:
-            if len(line) != 1:
+            try:
+                int(line)
+            except:
                 return False
-            else:
-                try:
-                    int(line)
-                except:
-                    return False
         else:
             if len(line) != 3 or line[1] != ' ':
                 return False
