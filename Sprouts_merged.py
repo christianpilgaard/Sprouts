@@ -189,6 +189,10 @@ class TriangulationLogic:
 # Game view class
 class GameView:
 
+    font = pygame.font.SysFont(None, 40)
+    back_button = pygame.Rect(20, 20, 100, 50)
+    restart_button = pygame.Rect(140, 20, 100, 50)
+
     # Method for updating nodes
     def updateNodes(self):
         for node in controller.getNodes():
@@ -231,11 +235,40 @@ class GameView:
     # Method updating screen
     def updateScreen(self):
         system.screen.fill(system.white)
+        view.drawGUI()
         view.updateTriLines()
         view.updateEdges()
         view.updateCentroids()
         view.updateNeighbours()
         view.updateNodes()
+
+    # Method for drawing text on the screen
+    def drawText(self, text, font, color, surface, x, y):
+        textobj = font.render(text, 1, color)
+        textrect = textobj.get_rect()
+        textrect.center = (x, y)
+        surface.blit(textobj, textrect)
+
+    def drawGUI(self):
+        pygame.draw.rect(system.screen, system.black, view.back_button)
+        view.drawText('back', view.font, system.white, system.screen, 70, 45)
+        pygame.draw.rect(system.screen, system.black, view.restart_button)
+        view.drawText('restart', view.font, system.white, system.screen, 190, 45)
+
+    def drawPopUp(self, text):
+        pupup_frame = pygame.Rect(195, 295, 410, 210)
+        popup = pygame.Rect(200, 300, 400, 200)
+        popup_button = pygame.Rect(350, 425, 100, 50)
+        pygame.draw.rect(screen, (0,0,0), pupup_frame)
+        pygame.draw.rect(screen, (255,255,255), popup)
+        if popup_button.collidepoint((mx,my)):
+            pygame.draw.rect(screen, (0,150,0), popup_button)
+            if click:
+                return
+        else:
+            pygame.draw.rect(view.screen, (0,0,0), popup_button)
+        draw_text(text, view.font, (0,0,0), view.screen, 400, 350)
+        draw_text('Close', font, (255,255,255), view.screen, 400, 450)
 
 
 # -------------------------------------------------------------------
@@ -304,12 +337,17 @@ def playGame(amount, txt, txt_input):
                     sys.exit()
                 elif event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        sys.exit()
+                        return 0
                     elif event.key == K_BACKSPACE:
-                        return
+                        return 1
 
-                # Mouse action -----------------------------
+                # Mouse action ------------------------------
                 elif event.type == MOUSEBUTTONDOWN:
+                    # Check if the buttons are pressed ------
+                    if view.back_button.collidepoint(pygame.mouse.get_pos()):
+                        return 0
+                    elif view.restart_button.collidepoint(pygame.mouse.get_pos()):
+                        return 1
 
                     # No active node ------------------------
                     if controller.getActivePos() is None:
@@ -394,6 +432,7 @@ def playGame(amount, txt, txt_input):
                                                 elif i == len(unlockedNodes) - 1:
                                                     Done = True
                                         if Done:
+                                            view.drawPopUp("The game is done.")
                                             print("the game is done")
 
             view.updateScreen()

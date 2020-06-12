@@ -45,17 +45,19 @@ def main_menu():
         if button_1.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_1)
             if click:
+                # Start simple version
                 play = 1
                 while play:
                     play = Sprouts.startGame(int(slider_no))
-                # Sprouts(int(slider_no))
-                # Start simple game
         else:
             pygame.draw.rect(screen, (0,0,0), button_1)
         if button_2.collidepoint((mx,my)) and error_text == '':
             pygame.draw.rect(screen, (0,150,0), button_2)
             if click:
-                Sprouts_merged.playGame(int(slider_no), False, [])
+                # start advanced version
+                play = 1
+                while play:
+                    play = Sprouts_merged.playGame(int(slider_no), False, [])
         else:
             pygame.draw.rect(screen, (0,0,0), button_2)
         if button_3.collidepoint((mx,my)) and error_text == '':
