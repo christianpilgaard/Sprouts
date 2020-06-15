@@ -1,12 +1,13 @@
 import pygame, sys
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
-import Sprouts
+from pygame.locals import *
+
+pygame.init()
+import Sprouts_simple
 import Sprouts_merged
 
 mainClock = pygame.time.Clock()
-from pygame.locals import *
-pygame.init()
 pygame.display.set_caption('Sprouts')
 screen = pygame.display.set_mode((800,800), 0, 32)
 
@@ -48,7 +49,8 @@ def main_menu():
                 # Start simple version
                 play = 1
                 while play:
-                    play = Sprouts.startGame(int(slider_no))
+                    play = Sprouts_simple.playGame(int(slider_no))
+                    pass
         else:
             pygame.draw.rect(screen, (0,0,0), button_1)
         if button_2.collidepoint((mx,my)) and error_text == '':

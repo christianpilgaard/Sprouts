@@ -63,6 +63,9 @@ class GameController:
     lastPos = None
     moved = False
 
+    # Other
+    turn = 0
+
     # Method for adding vertices
     def addNode(self, x, y):
         v = Node(len(self.nodes), x, y, [], False, False)
@@ -107,6 +110,15 @@ class GameController:
     def getActivePos(self):
         return self.activePos
 
+    def getPlayer(self):
+        return self.turn % 2 + 1
+
+    def getTurn(self):
+        return self.turn
+
+    def setTurn(self, turn):
+        self.turn = turn
+
     def resetGame(self):
         self.nodes.clear()
         self.edges.clear()
@@ -117,6 +129,7 @@ class GameController:
         self.drawing = False
         self.lastPos = None
         self.moved = False
+        self.turn = 0
 
     # Method for setting up initial nodes
     def startGame(self, n):
@@ -241,6 +254,10 @@ class GameController:
 # Game view class
 class GameView:
 
+    font = pygame.font.SysFont(None, 40)
+    back_button = pygame.Rect(20, 20, 100, 50)
+    restart_button = pygame.Rect(140, 20, 100, 50)
+
     # Method for updating nodes
     def updateNodes(self):
         for node in controller.getNodes():
@@ -261,9 +278,29 @@ class GameView:
 
     # Method updating screen
     def updateScreen(self):
-        system.screen.fill(system.white)
         view.updateEdges()
         view.updateNodes()
+        view.drawGUI()
+        view.displayPlayer()
+
+    # Method for drawing text on the screen
+    def drawText(self, text, font, color, surface, x, y):
+        textobj = font.render(text, 1, color)
+        textrect = textobj.get_rect()
+        textrect.center = (x, y)
+        surface.blit(textobj, textrect)
+
+    def drawGUI(self):
+        pygame.draw.rect(system.screen, system.black, view.back_button)
+        view.drawText('back', self.font, system.white, system.screen, 70, 45)
+        pygame.draw.rect(system.screen, system.black, view.restart_button)
+        view.drawText('restart', self.font, system.white, system.screen, 190, 45)
+
+    def displayPlayer(self):
+        if controller.getPlayer() == 1:
+            self.drawText('Player 1', self.font, system.blue, system.screen, system.height/2, system.width/20)
+        elif controller.getPlayer() == 2:
+            self.drawText('Player 2', self.font, system.red, system.screen, system.height/2, system.width/20)
 
 
 # -------------------------------------------------------------------
@@ -287,15 +324,20 @@ def playGame(amount):
                 sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    sys.exit()
+                    return 0
                 elif event.key == K_BACKSPACE:
-                    return
+                    return 1
                 elif event.key == K_SPACE:
                     print("Space")
 
             # Select node -----------------------------
             # Mouse 1 for drawing
             elif event.type == MOUSEBUTTONDOWN:
+                if view.back_button.collidepoint(pygame.mouse.get_pos()):
+                    return 0
+                elif view.restart_button.collidepoint(pygame.mouse.get_pos()):
+                    return 1
+
                 for node in controller.getNodes():
                     if controller.nodeCollision(node, controller.getMousePos(), "node"):
                         if len(node.relations) < 3:
@@ -349,6 +391,8 @@ def playGame(amount):
                                     controller.activeNode = None
                                     controller.activeItem = None
 
+                                    controller.setTurn(controller.getTurn()+1)
+
                             # Reset current drawing
                             controller.lastPos = None
                             controller.moved = False
@@ -358,6 +402,7 @@ def playGame(amount):
                             controller.removePlaceholder()
 
                             # Update screen
+                            system.screen.fill(system.white)
                             view.updateScreen()
 
                 if not controller.getDrawing():
@@ -371,10 +416,10 @@ def playGame(amount):
                     controller.removePlaceholder()
 
                     # Update screen
+                    system.screen.fill(system.white)
                     view.updateScreen()
 
-        view.updateEdges()
-        view.updateNodes()
+        view.updateScreen()
         pygame.display.update()
 
 
