@@ -19,7 +19,6 @@ class pathfinding:
 
         # Create a queue for BFS
         queue = []
-
         paths = []
 
         # Mark the source node as

@@ -1,0 +1,63 @@
+import pygame, random, sys, math
+from pygame.locals import *
+from Triangulation import Triangulation
+from libSystem import *
+from libNode import *
+from libController import *
+
+
+# ------------------------------------------------
+# Triangulation logic
+class TriangulationLogic:
+    def __init__(self):
+        self.dt = Triangulation()
+        # Triangulation related variables
+        self.centroids = []
+        self.chosenCenter = []
+        self.neighbours = []
+        self.centersize = 8
+
+    def initializeTriangulation(self, nodes):
+        # Insert nodes
+        for n in nodes:
+            self.getDt().addPoint([n.x, n.y])
+
+        # Add corners
+        self.getDt().addCornerNodes()
+        self.setCentroids(self.getDt().exportInCenters())
+
+    def getDt(self):
+        return self.dt
+
+    def getCentroids(self):
+        return self.centroids
+
+    def setCentroids(self, centroids):
+        self.centroids = centroids
+
+    def getChosenCenter(self):
+        return self.chosenCenter
+
+    def getNeighbours(self):
+        return self.neighbours
+
+    def setNeighbours(self, neighbours):
+        self.neighbours = neighbours
+
+    def getCentersize(self):
+        return self.centersize
+
+    def updateCentroids(self):
+        self.setCentroids(self.getDt().exportInCenters())
+
+    def clearNeighbours(self):
+        self.getNeighbours().clear()
+
+    def clearChosenCenter(self):
+        self.getChosenCenter().clear()
+
+    def resetGame(self):
+        self.getCentroids().clear()
+        self.getChosenCenter().clear()
+        self.getNeighbours().clear()
+        self.getDt().resetTriangulation()
