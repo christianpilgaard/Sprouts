@@ -38,6 +38,9 @@ class TriangulationLogic:
     def getCentersize(self):
         return self.centersize
 
+    def setCentersize(self, size):
+        self.centersize = size
+
     def initializeTriangulation(self, nodes):
         # Insert nodes
         for n in nodes:

@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 
 class Point:
     def __init__(self, point, nodeType):
@@ -144,10 +146,10 @@ class Triangulation(Point, Edge, Triangle):
         self.setDeadEnds([])
 
     def addCornerNodes(self):
-        self.addPoint([800, 800])
-        self.addPoint([1, 100])
-        self.addPoint([800, 100])
         self.addPoint([1, 800])
+        self.addPoint([1, 100])
+        self.addPoint([800, 800])
+        self.addPoint([800, 100])
 
         co1 = self.getPoint([800, 800])
         co1.setConnectable(False)
@@ -168,6 +170,26 @@ class Triangulation(Point, Edge, Triangle):
             centers.append([c.getX(), c.getY()])
 
         return centers
+
+    def exportMinRadius(self):
+        minRadius = 800
+        for tri in self.getAllTriangles():
+            point1, point2, point3 = tri.points
+            vector_1 = [(point1.getX() - point2.getX()), (point1.getY() - point2.getY())]
+            vector_2 = [(point3.getX() - point2.getX()), (point3.getY() - point2.getY())]
+            a = math.sqrt(abs((point1.getX()) - (point3.getX())) ** 2 + abs((point1.getY()) - (point3.getY())) ** 2)
+            b = math.sqrt(abs((point2.getX()) - (point3.getX())) ** 2 + abs((point2.getY()) - (point3.getY())) ** 2)
+            c = math.sqrt(abs((point1.getX()) - (point2.getX())) ** 2 + abs((point1.getY()) - (point2.getY())) ** 2)
+
+            unit_vector_1 = vector_1 / np.linalg.norm(vector_1)
+            unit_vector_2 = vector_2 / np.linalg.norm(vector_2)
+            dot_product = np.dot(unit_vector_1, unit_vector_2)
+            angleA = np.arccos(dot_product)
+            radius = (b*c*math.sin(angleA))/(a+b+c)
+
+            if radius < minRadius:
+                minRadius = radius
+        return minRadius
 
     def orientation(self, p, q, r):
         # to find the orientation of an ordered triplet (p,q,r)

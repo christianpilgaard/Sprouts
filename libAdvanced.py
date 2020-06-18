@@ -248,6 +248,12 @@ class Advanced:
                                         # Add new path and node
                                         triLogic.dt.addPath(controller.getActiveNode().getPos(), node.getPos(), triLogic.getChosenCenter(), mid)
                                         triLogic.updateCentroids()
+
+                                        minRadius = triLogic.dt.exportMinRadius()
+                                        if minRadius < controller.getSize():
+                                            controller.setSize(math.floor(minRadius))
+                                            triLogic.setCentersize((math.floor(minRadius*2/3)))
+
                                         triLogic.clearChosenCenter()
                                         triLogic.clearNeighbours()
 

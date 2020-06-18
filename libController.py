@@ -75,6 +75,9 @@ class GameController:
     def getSize(self):
         return self.size
 
+    def setSize(self, size):
+        self.size = size
+
     def getActiveNode(self):
         return self.activeNode
 
@@ -136,9 +139,9 @@ class GameController:
         self.getNodes().clear()
         angle = 0
         for i in range(n):
-            x = (system.getWidth() / 3.5) * math.cos(angle * 0.0174532925)
-            y = (system.getHeight() / 3.5) * math.sin(angle * 0.0174532925)
-            self.addNode((system.getWidth() / 2) + x, (system.getHeight() / 2) + y)
+            x = (system.getWidth() / 2.7) * math.cos(angle * 0.0174532925)
+            y = (system.getHeight() / 2.7) * math.sin(angle * 0.0174532925)
+            self.addNode((system.getWidth() / 2) + x, ((system.getHeight()+100) / 2) + y)
             angle += 360 / n
 
     # Method for checking whether a node
@@ -147,7 +150,8 @@ class GameController:
             dx = node.getX() - mousePos[0]
             dy = node.getY() - mousePos[1]
             dis = math.sqrt(dx ** 2 + dy ** 2)
-            if dis < self.getSize():
+            #if dis < self.getSize():
+            if dis < 12:
 
                 return True
             return False

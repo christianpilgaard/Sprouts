@@ -145,7 +145,7 @@ class System:
         self.updateTriLines(triEdges, thickness)
         self.updateEdges2(edges, thickness)
         self.updateCentroids(centroids, cenSize)
-        self.updateNeighbours(neighbours, size)
+        self.updateNeighbours(neighbours, 12)
         self.updateNodes(nodes, size)
         self.displayPlayer(player)
 
