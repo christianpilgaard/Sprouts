@@ -34,7 +34,6 @@ class Menu:
         circle_rect = (190, 175)
         circle_center = (200, 180)
         slider_base = pygame.Rect(200, 175, 500, 10)
-        slider_circle = pygame.Rect(circle_rect, (20, 20))
         button_1 = pygame.Rect(150, 235, 500, 100)
         button_2 = pygame.Rect(150, 370, 500, 100)
         button_3 = pygame.Rect(150, 505, 500, 100)
@@ -42,6 +41,8 @@ class Menu:
         while True:
             system.getScreen().fill(white)
             system.drawText('Sprouts', fontBig, black, screen, 400, 90)
+
+            slider_circle = pygame.Rect(circle_rect, (20, 20))
 
             mx, my = pygame.mouse.get_pos()
 

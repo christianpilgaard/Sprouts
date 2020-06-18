@@ -8,12 +8,24 @@ class pathfinding:
         # Create list of paths
         self.paths = self.BFS()
 
+    def getTri(self):
+        return self.tri
+
+    def getStart(self):
+        return self.start
+
+    def getGoal(self):
+        return self.goal
+
+    def getPaths(self):
+        return self.paths
+
     def BFS(self):
         # Mark all the vertices as not visited
         visited = {}
-        for i in self.tri.allPoints:
-            visited[str([i.x, i.y])] = False
-        for j in self.tri.exportInCenters():
+        for i in self.getTri().getAllPoints():
+            visited[str([i.getX(), i.getY()])] = False
+        for j in self.getTri().exportInCenters():
             visited[str(j)] = False
 
 
@@ -23,9 +35,9 @@ class pathfinding:
 
         # Mark the source node as
         # visited and enqueue it
-        if not self.start == self.goal:
-            visited[str(self.start)] = True
-        queue.append([[self.start], visited])
+        if not self.getStart() == self.getGoal():
+            visited[str(self.getStart())] = True
+        queue.append([[self.getStart()], visited])
 
         while queue:
 
@@ -40,9 +52,9 @@ class pathfinding:
             # has not been visited, then mark it
             # visited and enqueue it
 
-            for i in self.tri.exportNeighbours(n, self.getType(n), p, self.start):
+            for i in self.getTri().exportNeighbours(n, self.getType(n), p, self.getStart()):
                 if not visited[str(i)]:
-                    if i == self.goal:
+                    if i == self.getGoal():
                         path = p.copy()
                         path.append(i)
                         paths.append(path)
@@ -57,7 +69,7 @@ class pathfinding:
         return paths
 
     def getType(self, point):
-        if not self.tri.getPoint(point) is None:
+        if not self.getTri().getPoint(point) is None:
             type = "node"
         else:
             type = "centerNode"

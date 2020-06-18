@@ -13,10 +13,46 @@ class Point:
         self.connectable = True
         self.relations = 0
 
+    def getCoordinates(self):
+        return self.coordinates
+
+    def getX(self):
+        return self.x
+
+    def getY(self):
+        return self.y
+
+    def getType(self):
+        return self.type
+
+    def getPointInEdges(self):
+        return self.pointInEdges
+
+    def getPointInTriangles(self):
+        return self.pointInTriangles
+
+    def getCenterInTriangle(self):
+        return self.centerInTriangle
+
+    def setCenterInTriangle(self, centerInTriangle):
+        self.centerInTriangle = centerInTriangle
+
+    def getConnectable(self):
+        return self.connectable
+
+    def setConnectable(self, connectable):
+        self.connectable = connectable
+
+    def getRelations(self):
+        return self.relations
+
+    def setRelations(self, relations):
+        self.relations = relations
+
     def addRelations(self, extraRelations):
-        self.relations += extraRelations
-        if self.relations == 3:
-            self.connectable = False
+        self.setRelations(self.getRelations() + extraRelations)
+        if self.getRelations() == 3:
+            self.setConnectable(False)
 
 
 class Edge:
@@ -26,39 +62,86 @@ class Edge:
         self.edgeInTriangles = []
         self.drawn = False
 
+    def getStart(self):
+        return self.start
+
+    def getEnd(self):
+        return self.end
+
+    def getEdgeInTriangles(self):
+        return self.edgeInTriangles
+
+    def getDrawn(self):
+        return self.drawn
+
+    def setDrawn(self, drawn):
+        self.drawn = drawn
+
 
 class Triangle:
     def __init__(self, point1, point2, point3, edge1, edge2, edge3):
         self.points = (point1, point2, point3)
         self.edges = (edge1, edge2, edge3)
         self.center = Point(self.calculateCenter([point1, point2, point3]), "centerNode")
-        self.center.centerInTriangle = self
+        self.center.setCenterInTriangle(self)
+
+    def getPoints(self):
+        return self.points
+
+    def getEdges(self):
+        return self.edges
+
+    def getCenter(self):
+        return self.center
 
     def calculateCenter(self, tri):
         A = tri[2]
         B = tri[1]
         C = tri[0]
-        a = math.sqrt(abs((tri[0].x) - (tri[1].x)) ** 2 + abs((tri[0].y) - (tri[1].y)) ** 2)
-        b = math.sqrt(abs((tri[0].x) - (tri[2].x)) ** 2 + abs((tri[0].y) - (tri[2].y)) ** 2)
-        c = math.sqrt(abs((tri[1].x) - (tri[2].x)) ** 2 + abs((tri[1].y) - (tri[2].y)) ** 2)
+        a = math.sqrt(abs((tri[0].getX()) - (tri[1].getX())) ** 2 + abs((tri[0].getY()) - (tri[1].getY())) ** 2)
+        b = math.sqrt(abs((tri[0].getX()) - (tri[2].getX())) ** 2 + abs((tri[0].getY()) - (tri[2].getY())) ** 2)
+        c = math.sqrt(abs((tri[1].getX()) - (tri[2].getX())) ** 2 + abs((tri[1].getY()) - (tri[2].getY())) ** 2)
 
-        center = [((a * A.x) + (b * B.x) + (c * C.x)) / (a + b + c), ((a * A.y) + (b * B.y) + (c * C.y)) / (a + b + c)]
+        center = [((a * A.getX()) + (b * B.getX()) + (c * C.getX())) / (a + b + c), ((a * A.getY()) + (b * B.getY()) + (c * C.getY())) / (a + b + c)]
         return center
 
 
 class Triangulation(Point, Edge, Triangle):
     def __init__(self):
-
         self.allPoints = []
         self.allEdges = []
         self.allTriangles = []
         self.deadEnds = []
+
+    def getAllPoints(self):
+        return self.allPoints
+
+    def setAllPoints(self, allPoints):
+        self.allPoints = allPoints
+
+    def getAllEdges(self):
+        return self.allEdges
+
+    def setAllEdges(self, allEdges):
+        self.allEdges = allEdges
+
+    def getAllTriangles(self):
+        return self.allTriangles
+
+    def setAllTriangles(self, allTriangles):
+        self.allTriangles = allTriangles
+
+    def getDeadEnds(self):
+        return self.deadEnds
+
+    def setDeadEnds(self, deadEnds):
+        self.deadEnds = deadEnds
 
     def resetTriangulation(self):
-        self.allPoints = []
-        self.allEdges = []
-        self.allTriangles = []
-        self.deadEnds = []
+        self.setAllPoints([])
+        self.setAllEdges([])
+        self.setAllTriangles([])
+        self.setDeadEnds([])
 
     def addCornerNodes(self):
         self.addPoint([800, 800])
@@ -67,22 +150,22 @@ class Triangulation(Point, Edge, Triangle):
         self.addPoint([1, 800])
 
         co1 = self.getPoint([800, 800])
-        co1.connectable = False
+        co1.setConnectable(False)
 
         co2 = self.getPoint([1, 100])
-        co2.connectable = False
+        co2.setConnectable(False)
 
         co3 = self.getPoint([800, 100])
-        co3.connectable = False
+        co3.setConnectable(False)
 
         co4 = self.getPoint([1, 800])
-        co4.connectable = False
+        co4.setConnectable(False)
 
     def exportInCenters(self):
         centers = []
-        for tri in self.allTriangles:
-            c = tri.center
-            centers.append([c.x, c.y])
+        for tri in self.getAllTriangles():
+            c = tri.getCenter()
+            centers.append([c.getX(), c.getY()])
 
         return centers
 
@@ -127,15 +210,15 @@ class Triangulation(Point, Edge, Triangle):
     def addPoint(self, currentPoint):
         pointAsPoint = Point(currentPoint, "node")
         connections = []
-        for point in self.allPoints:
+        for point in self.getAllPoints():
             intersect = False
 
             # Check if an edge between currentPoint and another point intersect with an existed edge
-            for edge in self.allEdges:
-                if self.doIntersect(currentPoint, point.coordinates, edge.start.coordinates, edge.end.coordinates):
+            for edge in self.getAllEdges():
+                if self.doIntersect(currentPoint, point.getCoordinates(), edge.getStart().getCoordinates(), edge.getEnd().getCoordinates()):
                     # Intersect in the starting or ending points is allowed
-                    if ((point.coordinates == edge.start.coordinates) or (point.coordinates == edge.end.coordinates)
-                            or (currentPoint == edge.start.coordinates) or (currentPoint == edge.end.coordinates)):
+                    if ((point.getCoordinates() == edge.getStart().getCoordinates()) or (point.getCoordinates() == edge.getEnd().getCoordinates())
+                            or (currentPoint == edge.getStart().getCoordinates()) or (currentPoint == edge.getEnd().getCoordinates())):
                         continue
                     else:
                         intersect = True
@@ -143,21 +226,21 @@ class Triangulation(Point, Edge, Triangle):
             # Add new edge, if it not collide in the existed edges
             if not intersect:
                 newEdge = Edge(pointAsPoint, point)
-                self.allEdges.append(newEdge)
-                pointAsPoint.pointInEdges.append(newEdge)
-                point.pointInEdges.append(newEdge)
+                self.getAllEdges().append(newEdge)
+                pointAsPoint.getPointInEdges().append(newEdge)
+                point.getPointInEdges().append(newEdge)
                 connections.append(point)
 
         # if there are more than 1 connection will there be minimum 1 new triangle
         if len(connections) > 1:
             for i, point in enumerate(connections):
                 for point2 in connections[(i + 1):]:
-                    for edgeConnect in point.pointInEdges:
-                        if edgeConnect in point2.pointInEdges:
+                    for edgeConnect in point.getPointInEdges():
+                        if edgeConnect in point2.getPointInEdges():
                             # Check if there are a point inside
                             pInside = False
-                            for tri in edgeConnect.edgeInTriangles:
-                                for p in tri.points:
+                            for tri in edgeConnect.getEdgeInTriangles():
+                                for p in tri.getPoints():
                                     if p == point or p == point2:
                                         continue
                                     if p in connections:
@@ -165,7 +248,7 @@ class Triangulation(Point, Edge, Triangle):
                             if not pInside:
                                 self.addTriangle(pointAsPoint, point, point2)
 
-        self.allPoints.append(pointAsPoint)
+        self.getAllPoints().append(pointAsPoint)
 
     def addPath(self, start, end, inCenters, midPoint):
         if len(inCenters) < 2:
@@ -176,12 +259,12 @@ class Triangulation(Point, Edge, Triangle):
                 oldEdge = self.getEdge(p1, p2)
 
                 # Delete triangles with this edge
-                for tri in oldEdge.edgeInTriangles:
+                for tri in oldEdge.getEdgeInTriangles():
                     self.deleteTriangle(tri, [oldEdge])
                 self.deleteEdge(oldEdge)
             else:
                 center = self.getCenter(inCenters[0])
-                self.deleteTriangle(center.centerInTriangle, [])
+                self.deleteTriangle(center.getCenterInTriangle(), [])
 
             # Add midpoint, new edges and triangles
             self.addPoint(midPoint)
@@ -191,8 +274,8 @@ class Triangulation(Point, Edge, Triangle):
             newEdge1 = self.getEdge(p1, mid)
             newEdge2 = self.getEdge(mid, p2)
 
-            newEdge1.drawn = True
-            newEdge2.drawn = True
+            newEdge1.setDrawn(True)
+            newEdge2.setDrawn(True)
 
             p1.addRelations(1)
             p2.addRelations(1)
@@ -201,17 +284,17 @@ class Triangulation(Point, Edge, Triangle):
         if len(inCenters) > 1:
             # Add first centroid
             center = self.getCenter(inCenters[0])
-            self.deleteTriangle(center.centerInTriangle, [])
+            self.deleteTriangle(center.getCenterInTriangle(), [])
 
             self.addPoint(inCenters[0])
 
             p1 = self.getPoint(start)
             p2 = self.getPoint(inCenters[0])
-            p2.connectable = False
+            p2.setConnectable(False)
             newEdge = self.getEdge(p1, p2)
 
             # mark the the first drawn edge
-            newEdge.drawn = True
+            newEdge.setDrawn(True)
             p1.addRelations(1)
             p2.addRelations(1)
 
@@ -221,11 +304,11 @@ class Triangulation(Point, Edge, Triangle):
                     c2 = c
                     c1 = inCenters[i - 1]
                     # Find the edge that colide with the connection of the two centroids
-                    for oldEdge in self.allEdges:
-                        if self.doIntersect(c1, c2, oldEdge.start.coordinates, oldEdge.end.coordinates):
+                    for oldEdge in self.getAllEdges():
+                        if self.doIntersect(c1, c2, oldEdge.getStart().getCoordinates(), oldEdge.getEnd().getCoordinates()):
 
                             # Delete triangles with this edge
-                            for tri in oldEdge.edgeInTriangles:
+                            for tri in oldEdge.getEdgeInTriangles():
                                 self.deleteTriangle(tri, [oldEdge])
                             self.deleteEdge(oldEdge)
                             break
@@ -235,11 +318,11 @@ class Triangulation(Point, Edge, Triangle):
                     po1 = self.getPoint(c1)
                     po2 = self.getPoint(c2)
                     if c2 != midPoint:
-                        po2.connectable = False
+                        po2.setConnectable(False)
                     newEdge = self.getEdge(po1, po2)
 
                     # mark the the drawn edge
-                    newEdge.drawn = True
+                    newEdge.setDrawn(True)
                     po1.addRelations(1)
                     po2.addRelations(1)
 
@@ -248,7 +331,7 @@ class Triangulation(Point, Edge, Triangle):
             pt2 = self.getPoint(end)
             newEdge = self.getEdge(pt1, pt2)
 
-            newEdge.drawn = True
+            newEdge.setDrawn(True)
             pt1.addRelations(1)
             pt2.addRelations(1)
 
@@ -256,30 +339,30 @@ class Triangulation(Point, Edge, Triangle):
         point1 = points[0]
         point2 = points[1]
         point3 = points[2]
-        for tri in self.allTriangles:
-            if (tri.points == (point1, point2, point3) or tri.points == (point1, point3, point2) or
-                    tri.points == (point2, point1, point3) or tri.points == (point2, point3, point1) or
-                    tri.points == (point3, point1, point2) or tri.points == (point3, point2, point1)):
+        for tri in self.getAllTriangles():
+            if (tri.getPoints() == (point1, point2, point3) or tri.getPoints() == (point1, point3, point2) or
+                    tri.getPoints() == (point2, point1, point3) or tri.getPoints() == (point2, point3, point1) or
+                    tri.getPoints() == (point3, point1, point2) or tri.getPoints() == (point3, point2, point1)):
                 return tri
 
     def deleteTriangle(self, tri, saveEdge):
-        (e1, e2, e3) = tri.edges
-        (p1, p2, p3) = tri.points
+        (e1, e2, e3) = tri.getEdges()
+        (p1, p2, p3) = tri.getPoints()
 
         if len(saveEdge) > 0:
             for e in [e1, e2, e3]:
                 if (e != saveEdge[0]):
-                    e.edgeInTriangles.remove(tri)
+                    e.getEdgeInTriangles().remove(tri)
         else:
-            e1.edgeInTriangles.remove(tri)
-            e2.edgeInTriangles.remove(tri)
-            e3.edgeInTriangles.remove(tri)
+            e1.getEdgeInTriangles().remove(tri)
+            e2.getEdgeInTriangles().remove(tri)
+            e3.getEdgeInTriangles().remove(tri)
 
-        p1.pointInTriangles.remove(tri)
-        p2.pointInTriangles.remove(tri)
-        p3.pointInTriangles.remove(tri)
+        p1.getPointInTriangles().remove(tri)
+        p2.getPointInTriangles().remove(tri)
+        p3.getPointInTriangles().remove(tri)
 
-        self.allTriangles.remove(tri)
+        self.getAllTriangles().remove(tri)
 
     def addTriangle(self, p1, p2, p3):
         edge1, edge2, edge3 = self.getEdges(p1, p2, p3)
@@ -287,36 +370,36 @@ class Triangulation(Point, Edge, Triangle):
         # Make new triangle
         newTriangle = Triangle(p1, p2, p3, edge1, edge2, edge3)
         # Add triangle to Triangulation memory
-        self.allTriangles.append(newTriangle)
+        self.getAllTriangles().append(newTriangle)
 
         # Add triangle to points and edges
-        p1.pointInTriangles.append(newTriangle)
-        p2.pointInTriangles.append(newTriangle)
-        p3.pointInTriangles.append(newTriangle)
-        edge1.edgeInTriangles.append(newTriangle)
-        edge2.edgeInTriangles.append(newTriangle)
-        edge3.edgeInTriangles.append(newTriangle)
+        p1.getPointInTriangles().append(newTriangle)
+        p2.getPointInTriangles().append(newTriangle)
+        p3.getPointInTriangles().append(newTriangle)
+        edge1.getEdgeInTriangles().append(newTriangle)
+        edge2.getEdgeInTriangles().append(newTriangle)
+        edge3.getEdgeInTriangles().append(newTriangle)
 
     def pointInsideTriangle(self, p1, p2, p3, mid):
-        if (((p1.x > mid.x) and (p2.x > mid.x) and (p3.x > mid.x)) or
-                ((p1.x < mid.x) and (p2.x < mid.x) and (p3.x < mid.x)) or
-                ((p1.y > mid.y) and (p2.y > mid.y) and (p3.y > mid.y)) or
-                ((p1.y < mid.y) and (p2.y < mid.y) and (p3.y < mid.y))):
+        if (((p1.getX() > mid.getX()) and (p2.getX() > mid.getX()) and (p3.getX() > mid.getX())) or
+                ((p1.getX() < mid.getX()) and (p2.getX() < mid.getX()) and (p3.getX() < mid.getX())) or
+                ((p1.getY() > mid.getY()) and (p2.getY() > mid.getY()) and (p3.getY() > mid.getY())) or
+                ((p1.getY() < mid.getY()) and (p2.getY() < mid.getY()) and (p3.getY() < mid.getY()))):
             return False
         else:
             return True
 
     def getEdges(self, point1, point2, point3):
         edges = []
-        for edge in self.allEdges:
-            if (edge.start.coordinates == point1.coordinates and edge.end.coordinates == point2.coordinates) or (
-                    edge.start.coordinates == point2.coordinates and edge.end.coordinates == point1.coordinates):
+        for edge in self.getAllEdges():
+            if (edge.getStart().getCoordinates() == point1.getCoordinates() and edge.getEnd().getCoordinates() == point2.getCoordinates()) or (
+                    edge.getStart().getCoordinates() == point2.getCoordinates() and edge.getEnd().getCoordinates() == point1.getCoordinates()):
                 edges.append(edge)
-            elif (edge.start.coordinates == point1.coordinates and edge.end.coordinates == point3.coordinates) or (
-                    edge.start.coordinates == point3.coordinates and edge.end.coordinates == point1.coordinates):
+            elif (edge.getStart().getCoordinates() == point1.getCoordinates() and edge.getEnd().getCoordinates() == point3.getCoordinates()) or (
+                    edge.getStart().getCoordinates() == point3.getCoordinates() and edge.getEnd().getCoordinates() == point1.getCoordinates()):
                 edges.append(edge)
-            elif (edge.start.coordinates == point3.coordinates and edge.end.coordinates == point2.coordinates) or (
-                    edge.start.coordinates == point2.coordinates and edge.end.coordinates == point3.coordinates):
+            elif (edge.getStart().getCoordinates() == point3.getCoordinates() and edge.getEnd().getCoordinates() == point2.getCoordinates()) or (
+                    edge.getStart().getCoordinates() == point2.getCoordinates() and edge.getEnd().getCoordinates() == point3.getCoordinates()):
                 edges.append(edge)
             # Stop search if all edges are found
             if len(edges) == 3:
@@ -324,28 +407,28 @@ class Triangulation(Point, Edge, Triangle):
         return edges
 
     def getEdge(self, point1, point2):
-        for edge in self.allEdges:
-            if (edge.start.coordinates == point1.coordinates and edge.end.coordinates == point2.coordinates) or (
-                    edge.start.coordinates == point2.coordinates and edge.end.coordinates == point1.coordinates):
+        for edge in self.getAllEdges():
+            if (edge.getStart().getCoordinates() == point1.getCoordinates() and edge.getEnd().getCoordinates() == point2.getCoordinates()) or (
+                    edge.getStart().getCoordinates() == point2.getCoordinates() and edge.getEnd().getCoordinates() == point1.getCoordinates()):
                 return edge
 
     def deleteEdge(self, edge):
-        (p1, p2) = edge.start, edge.end
+        (p1, p2) = edge.getStart(), edge.getEnd()
 
-        p1.pointInEdges.remove(edge)
-        p2.pointInEdges.remove(edge)
+        p1.getPointInEdges().remove(edge)
+        p2.getPointInEdges().remove(edge)
 
-        self.allEdges.remove(edge)
+        self.getAllEdges().remove(edge)
 
     def getPoint(self, point):
-        for p in self.allPoints:
-            if (int(p.x) == int(point[0])) and (int(p.y) == int(point[1])):
+        for p in self.getAllPoints():
+            if (int(p.getX()) == int(point[0])) and (int(p.getY()) == int(point[1])):
                 return p
 
     def getCenter(self, point):
-        for tri in self.allTriangles:
-            c = tri.center
-            if (c.x == point[0]) and (c.y == point[1]):
+        for tri in self.getAllTriangles():
+            c = tri.getCenter()
+            if (c.getX() == point[0]) and (c.getY() == point[1]):
                 return c
 
     def exportNeighbours(self, coords, typeOfNode, alreadyChosen, startNode):
@@ -353,27 +436,27 @@ class Triangulation(Point, Edge, Triangle):
         if typeOfNode == "node":
             chosenPoint = self.getPoint(coords)
             # Add all points where there are an edge between and the centroid for the triangles the point is a part of
-            for edge in self.allEdges:
-                if not edge.drawn:
-                    if edge.start == chosenPoint and edge.end.connectable:
-                        Neighbours.append(edge.end.coordinates)
-                    elif edge.end == chosenPoint and edge.start.connectable:
-                        Neighbours.append(edge.start.coordinates)
-            for tri in chosenPoint.pointInTriangles:
-                Neighbours.append([tri.center.x, tri.center.y])
+            for edge in self.getAllEdges():
+                if not edge.getDrawn():
+                    if edge.getStart() == chosenPoint and edge.getEnd().getConnectable():
+                        Neighbours.append(edge.getEnd().getCoordinates())
+                    elif edge.getEnd() == chosenPoint and edge.getStart().getConnectable():
+                        Neighbours.append(edge.getStart().getCoordinates())
+            for tri in chosenPoint.getPointInTriangles():
+                Neighbours.append([tri.getCenter().getX(), tri.getCenter().getY()])
         elif typeOfNode == "centerNode":
             # Add all points of the triangle the centroid is in and the centroids in the neighbouring triangles
             center = self.getCenter(coords)
-            tri = center.centerInTriangle
-            for point in tri.points:
-                if point.connectable:
-                    Neighbours.append(point.coordinates)
-            for edge in tri.edges:
-                if not edge.drawn:
-                    for triangle in edge.edgeInTriangles:
+            tri = center.getCenterInTriangle()
+            for point in tri.getPoints():
+                if point.getConnectable():
+                    Neighbours.append(point.getCoordinates())
+            for edge in tri.getEdges():
+                if not edge.getDrawn():
+                    for triangle in edge.getEdgeInTriangles():
                         if triangle != tri:
-                            if [triangle.center.x, triangle.center.y] not in alreadyChosen:
-                                Neighbours.append([triangle.center.x, triangle.center.y])
+                            if [triangle.getCenter().getX(), triangle.getCenter().getY()] not in alreadyChosen:
+                                Neighbours.append([triangle.getCenter().getX(), triangle.getCenter().getY()])
         if startNode:
             if startNode in Neighbours:
                 # remove startnode, if there are only chosen 1 centroid = no loop
@@ -382,7 +465,7 @@ class Triangulation(Point, Edge, Triangle):
                     Neighbours.remove(startNode)
                 else:
                     p = self.getPoint(startNode)
-                    if p.relations + 1 == 3:
+                    if p.getRelations() + 1 == 3:
                         Neighbours.remove(startNode)
         return Neighbours
 

@@ -45,9 +45,9 @@ class Drawing:
                 # Select node -----------------------------
                 # Mouse 1 for drawing
                 elif event.type == MOUSEBUTTONDOWN:
-                    if system.back_button.collidepoint(pygame.mouse.get_pos()):
+                    if system.getBackButton().collidepoint(pygame.mouse.get_pos()):
                         return 0
-                    elif system.restart_button.collidepoint(pygame.mouse.get_pos()):
+                    elif system.getRestartButton().collidepoint(pygame.mouse.get_pos()):
                         return 1
 
                     for node in controller.getNodes():

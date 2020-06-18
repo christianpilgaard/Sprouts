@@ -115,7 +115,7 @@ class GameController:
 
     def findNode(self, id):
         for n in self.getNodes():
-            if n.id == id:
+            if n.getId() == id:
                 return n
 
     def resetGame(self):
@@ -144,15 +144,15 @@ class GameController:
     # Method for checking whether a node
     def nodeCollision(self, node, mousePos, type):
         if type == "node":
-            dx = node.x - mousePos[0]
-            dy = node.y - mousePos[1]
+            dx = node.getX() - mousePos[0]
+            dy = node.getY() - mousePos[1]
             dis = math.sqrt(dx ** 2 + dy ** 2)
             if dis < self.getSize():
 
                 return True
             return False
         elif type == "node2":
-            if not ((abs(mousePos[0] - node.x)) < self.getSize()) & ((abs(mousePos[1] - node.y)) < self.getSize()):
+            if not ((abs(mousePos[0] - node.getX())) < self.getSize()) & ((abs(mousePos[1] - node.getY())) < self.getSize()):
                 return False
             return True
         else:
@@ -162,8 +162,8 @@ class GameController:
 
     # Method for checking a position has reached a certain distance away from a node
     def reverseNodeCollision(self, node, mousePos):
-        dx = node.x - mousePos[0]
-        dy = node.y - mousePos[1]
+        dx = node.getX() - mousePos[0]
+        dy = node.getY() - mousePos[1]
         dis = math.sqrt(dx ** 2 + dy ** 2)
         if dis < self.getSize() + 10:
             return False
@@ -198,7 +198,7 @@ class GameController:
     def isEdgeOverlapping(self, tempEdge, edge2):
         for pos1 in tempEdge:
             for i, pos2 in enumerate(edge2):
-                if i > 10 or i+10 < len(edge2):
+                if i > 10 or i + 10 < len(edge2):
                     if pos1 == pos2:
                         return True
         return False
@@ -206,8 +206,8 @@ class GameController:
     # Method for removing placeholder item
     def removePlaceholder(self):
         if self.getActiveNode() is not None:
-            if -1 in self.getActiveNode().relations:
-                self.getActiveNode().relations.remove(-1)
+            if -1 in self.getActiveNode().getRelations():
+                self.getActiveNode().getRelations().remove(-1)
 
     # Method for filling blank coordinates between two registered points in an edge
     def fillBlank(self, pos1, pos2):

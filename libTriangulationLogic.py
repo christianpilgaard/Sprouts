@@ -17,17 +17,8 @@ class TriangulationLogic:
         self.neighbours = []
         self.centersize = 8
 
-    def initializeTriangulation(self, nodes):
-        # Insert nodes
-        for n in nodes:
-            self.getDt().addPoint([n.x, n.y])
-
-        # Add corners
-        self.getDt().addCornerNodes()
-        self.setCentroids(self.getDt().exportInCenters())
-
-    def getDt(self):
-        return self.dt
+#    def getDt(self):
+#        return self.dt
 
     def getCentroids(self):
         return self.centroids
@@ -47,8 +38,17 @@ class TriangulationLogic:
     def getCentersize(self):
         return self.centersize
 
+    def initializeTriangulation(self, nodes):
+        # Insert nodes
+        for n in nodes:
+            self.dt.addPoint(n.getPos())
+
+        # Add corners
+        self.dt.addCornerNodes()
+        self.setCentroids(self.dt.exportInCenters())
+
     def updateCentroids(self):
-        self.setCentroids(self.getDt().exportInCenters())
+        self.setCentroids(self.dt.exportInCenters())
 
     def clearNeighbours(self):
         self.getNeighbours().clear()
@@ -60,4 +60,4 @@ class TriangulationLogic:
         self.getCentroids().clear()
         self.getChosenCenter().clear()
         self.getNeighbours().clear()
-        self.getDt().resetTriangulation()
+        self.dt.resetTriangulation()

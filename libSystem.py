@@ -25,8 +25,8 @@ class System:
         self.fontMedium = pygame.font.SysFont(None, 40)
         self.fontBig = pygame.font.SysFont(None, 100)
         # Buttons
-        self.back_button = pygame.Rect(20, 20, 100, 50)
-        self.restart_button = pygame.Rect(140, 20, 100, 50)
+        self.backButton = pygame.Rect(20, 20, 100, 50)
+        self.restartButton = pygame.Rect(140, 20, 100, 50)
         # Screen
         self.screen = pygame.display.set_mode((width, height), RESIZABLE)
         pygame.display.set_caption('Sprouts')
@@ -34,7 +34,6 @@ class System:
         self.mainClock = pygame.time.Clock()
 
     def init(self):
-        print("System initialized.")
         pygame.init()
         pygame.display.set_caption("Sprouts")
         self.getScreen().fill(self.getWhite())
@@ -75,6 +74,12 @@ class System:
     def getFontBig(self):
         return self.fontBig
 
+    def getBackButton(self):
+        return self.backButton
+
+    def getRestartButton(self):
+        return self.restartButton
+
     def getScreen(self):
         return self.screen
 
@@ -94,7 +99,7 @@ class System:
     # Method for updating nodes
     def updateNodes(self, nodes, size):
         for node in nodes:
-            if len(node.relations) == 3:
+            if len(node.getRelations()) == 3:
                 pygame.draw.circle(self.getScreen(), self.getLGreen(), (int(node.x), int(node.y)), size)
             else:
                 pygame.draw.circle(self.getScreen(), self.getBlack(), (int(node.x), int(node.y)), size)
@@ -118,7 +123,7 @@ class System:
 
     def updateTriLines(self, triEdges, size):
         for dEdge in triEdges:
-            pygame.draw.line(self.getScreen(), self.getGray(), dEdge.start.coordinates, dEdge.end.coordinates, size)
+            pygame.draw.line(self.getScreen(), self.getGray(), dEdge.getStart().getCoordinates(), dEdge.getEnd().getCoordinates(), size)
 
     def updateNeighbours(self, neighbours, size):
         for [x, y] in neighbours:
@@ -153,9 +158,9 @@ class System:
 
     def displayWinner(self, player):
         if player == 1:
-            return self.drawPopUp('Player 2 wins!'.format())
+            return self.drawPopUp('Player 2 wins!')
         elif player == 2:
-            return self.drawPopUp('Player 1 wins!'.format())
+            return self.drawPopUp('Player 1 wins!')
 
     # Method for drawing text on the screen
     def drawText(self, text, font, color, surface, x, y):
@@ -165,9 +170,9 @@ class System:
         surface.blit(textobj, textrect)
 
     def drawGUI(self):
-        pygame.draw.rect(self.getScreen(), self.getBlack(), self.back_button)
+        pygame.draw.rect(self.getScreen(), self.getBlack(), self.getBackButton())
         self.drawText('back', self.getFontMedium(), self.getWhite(), self.getScreen(), 70, 45)
-        pygame.draw.rect(self.getScreen(), self.getBlack(), self.restart_button)
+        pygame.draw.rect(self.getScreen(), self.getBlack(), self.getRestartButton())
         self.drawText('restart', self.getFontMedium(), self.getWhite(), self.getScreen(), 190, 45)
 
     def drawPopUp(self, text):
@@ -176,16 +181,16 @@ class System:
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
-        pupup_frame = pygame.Rect(195, 295, 410, 210)
+        pupupFrame = pygame.Rect(195, 295, 410, 210)
         popup = pygame.Rect(200, 300, 400, 200)
-        popup_button = pygame.Rect(350, 425, 100, 50)
-        pygame.draw.rect(self.getScreen(), (0, 0, 0), pupup_frame)
-        pygame.draw.rect(self.getScreen(), (255, 255, 255), popup)
-        if popup_button.collidepoint(pygame.mouse.get_pos()):
-            pygame.draw.rect(system.getScreen(), (0, 150, 0), popup_button)
+        popupButton = pygame.Rect(350, 425, 100, 50)
+        pygame.draw.rect(self.getScreen(), self.getBlack(), pupupFrame)
+        pygame.draw.rect(self.getScreen(), self.getWhite(), popup)
+        if popupButton.collidepoint(pygame.mouse.get_pos()):
+            pygame.draw.rect(self.getScreen(), self.getDGreen(), popupButton)
             if click:
                 return True
         else:
-            pygame.draw.rect(self.getScreen(), (0, 0, 0), popup_button)
-        self.drawText(text, self.getFontMedium(), (0, 0, 0), self.getScreen(), 400, 350)
-        self.drawText('Close', self.getFontMedium(), (255, 255, 255), self.getScreen(), 400, 450)
+            pygame.draw.rect(self.getScreen(), self.getBlack(), popupButton)
+        self.drawText(text, self.getFontMedium(), self.getBlack(), self.getScreen(), 400, 350)
+        self.drawText('Close', self.getFontMedium(), self.getWhite(), self.getScreen(), 400, 450)
