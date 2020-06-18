@@ -152,7 +152,9 @@ class Menu:
             with open(filename, 'r') as f:
                 lines = [line.rstrip() for line in f]
                 if self.checkValidFile(lines):
-                    Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
+                    play = 1
+                    while play:
+                        play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
                 else:
                     return 'Unexpected file content format.'
         except:
@@ -168,12 +170,12 @@ class Menu:
                 except:
                     return False
             else:
-                if len(line) != 3 or line[1] != ' ':
+                if ' ' not in line[1:-1]:
                     return False
                 else:
                     try:
-                        int(line[0])
-                        int(line[2])
+                        int(line[:line.find(' ')])
+                        int(line[line.find(' '):])
                     except:
                         return False
         return True

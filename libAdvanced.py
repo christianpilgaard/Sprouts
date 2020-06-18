@@ -1,4 +1,4 @@
-import pygame, random, sys, math
+import pygame, random, sys, math, time
 import numpy as np
 from pygame.locals import *
 from Triangulation import Triangulation
@@ -30,15 +30,19 @@ class Advanced:
         controller.startGame(amount)
         triLogic.initializeTriangulation(controller.getNodes())
         if txt:
+            system.updateScreen2(controller.getNodes(), controller.getEdges(), triLogic.getCentroids(),
+                                 triLogic.dt.getAllEdges(),
+                                 triLogic.getNeighbours(), controller.getSize(), triLogic.getCentersize(), 5,
+                                 controller.getPlayer())
+            pygame.display.update()
             for inp in txt_input:
-                s = controller.findNode(int(inp[0]) - 1)
-                e = controller.findNode(int(inp[2]) - 1)
+                s = controller.findNode(int(inp[:inp.find(' ')]) - 1)
+                e = controller.findNode(int(inp[inp.find(' '):]) - 1)
 
                 if len(s.getRelations()) < 3 and len(e.getRelations()) < 3:
                     paths = pathfinding(triLogic.dt, s.getPos(), e.getPos()).getPaths()
 
                     if len(paths) > 0:
-                        print("more moves")
                         i = random.randint(0, len(paths) - 1)
 
                         for j, point in enumerate(paths[i]):
@@ -51,8 +55,7 @@ class Advanced:
                         if len(triLogic.getChosenCenter()) > 0:
                             mid = triLogic.getChosenCenter()[int(len(triLogic.getChosenCenter()) / 2)]
                         else:
-                            mid = [(s.getX() + e.getX()) / 2,
-                                   (s.getY() + e.getY()) / 2]
+                            mid = [(s.getX() + e.getX()) / 2, (s.getY() + e.getY()) / 2]
                         controller.addNode(mid[0], mid[1])
 
 
@@ -73,26 +76,72 @@ class Advanced:
                                              triLogic.getNeighbours(), controller.getSize(), triLogic.getCentersize(), 5,
                                              controller.getPlayer())
                         pygame.display.update()
-
                     else:
                         controller.setError(True)
                         break
+                startTime = time.time()
+                while 3 > time.time() - startTime:
+                    for event in pygame.event.get():
+                        mousePos = pygame.mouse.get_pos()
 
-                time.sleep(2.0)
+                        # Quit game
+                        if event.type == QUIT:
+                            pygame.quit()
+                            sys.exit()
+                        elif event.type == KEYDOWN:
+                            if event.key == K_ESCAPE:
+                                return 0
+                            elif event.key == K_BACKSPACE:
+                                return 1
 
-            while controller.getError():
-                view.updateScreen()
-                close = view.drawPopUp('Unable to make the move.')
-                pygame.display.update()
-                if close:
-                    return 0
+                        # Mouse action -----------------------------
+                        elif event.type == MOUSEBUTTONDOWN:
 
+                            # Check if the buttons are pressed ------
+                            if system.getBackButton().collidepoint(pygame.mouse.get_pos()):
+                                return 0
+                            elif system.getRestartButton().collidepoint(pygame.mouse.get_pos()):
+                                return 1
+
+            if controller.getError():
+                while 1:
+                    close = system.drawPopUp('Unable to make the move.')
+                    pygame.display.update()
+                    if close:
+                        break
+            else:
+                while 1:
+                    close = system.drawPopUp('No more moves in file.')
+                    pygame.display.update()
+                    if close:
+                        break
             while 1:
-                view.updateScreen()
-                close = view.drawPopUp('No more moves in file.')
+                system.updateScreen2(controller.getNodes(), controller.getEdges(), triLogic.getCentroids(),
+                                     triLogic.dt.getAllEdges(),
+                                     triLogic.getNeighbours(), controller.getSize(), triLogic.getCentersize(), 5,
+                                     controller.getPlayer())
                 pygame.display.update()
-                if close:
-                    return 0
+                for event in pygame.event.get():
+                    mousePos = pygame.mouse.get_pos()
+
+                    # Quit game
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == KEYDOWN:
+                        if event.key == K_ESCAPE:
+                            return 0
+                        elif event.key == K_BACKSPACE:
+                            return 1
+
+                    # Mouse action -----------------------------
+                    elif event.type == MOUSEBUTTONDOWN:
+
+                        # Check if the buttons are pressed ------
+                        if system.getBackButton().collidepoint(pygame.mouse.get_pos()):
+                            return 0
+                        elif system.getRestartButton().collidepoint(pygame.mouse.get_pos()):
+                            return 1
 
         # Game loop -----------------------------
         while 1:
@@ -110,6 +159,7 @@ class Advanced:
 
                 # Quit game
                 if event.type == QUIT:
+                    pygame.quit()
                     sys.exit()
                 elif event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
@@ -124,7 +174,7 @@ class Advanced:
                     if system.getBackButton().collidepoint(pygame.mouse.get_pos()):
                         return 0
                     elif system.getRestartButton().collidepoint(pygame.mouse.get_pos()):
-                        return 2
+                        return 1
 
                     # No active node ------------------------
                     if controller.getActivePos() is None:
@@ -143,9 +193,7 @@ class Advanced:
                         for centerNode in triLogic.getCentroids():
                             if centerNode in triLogic.getNeighbours():
                                 if controller.nodeCollision(centerNode, mousePos, "centerNode"):
-                                    #controller.getEdges().append([controller.getActivePos(), centerNode])
-                                    #controller.setActivePos(centerNode)
-                                    #triLogic.getChosenCenter().append(centerNode)
+                                    triLogic.getChosenCenter().append(centerNode)
 
                                     triLogic.getNeighbours().clear()
                                     triLogic.setNeighbours(triLogic.dt.exportNeighbours(centerNode, "centerNode", triLogic.getChosenCenter(), controller.getActiveNode().getPos()))
@@ -156,7 +204,6 @@ class Advanced:
                                         controller.getEdges().append([controller.getActivePos(), centerNode])
                                         controller.getTempEdge().append([controller.getActivePos(), centerNode])
                                         controller.setActivePos(centerNode)
-                                        triLogic.getChosenCenter().append(centerNode)
                                     else:
                                         for edge in controller.getTempEdge():
                                             controller.getEdges().remove(edge)

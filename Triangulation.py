@@ -3,9 +3,9 @@ import math
 
 class Point:
     def __init__(self, point, nodeType):
-        self.coordinates = point
         self.x = point[0]
         self.y = point[1]
+        self.coordinates = point
         self.type = nodeType
         self.pointInEdges = []
         self.pointInTriangles = []
