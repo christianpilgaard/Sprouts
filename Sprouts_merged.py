@@ -67,6 +67,7 @@ class GameController:
     nodes = []
     size = 10
     edges = []
+    currentEdges = []
 
     # Drawing related variables
     activeNode = None
@@ -125,6 +126,7 @@ class GameController:
     def resetGame(self):
         self.nodes.clear()
         self.edges.clear()
+        self.currentEdges.clear()
         self.activePos = None
         self.activeItem = None
         self.activeNode = None
@@ -425,13 +427,28 @@ def playGame(amount, txt, txt_input):
                             for centerNode in triLogic.centroids:
                                 if centerNode in triLogic.neighbours:
                                     if controller.nodeCollision(centerNode, mousePos, "centerNode"):
-                                        controller.edges.append([controller.getActivePos(), centerNode])
-                                        controller.setActivePos(centerNode)
-                                        triLogic.chosenCenter.append(centerNode)
 
                                         triLogic.neighbours.clear()
                                         triLogic.neighbours = triLogic.dt.exportNeighbours(centerNode,
                                                 "centerNode", triLogic.chosenCenter, [controller.getActiveNode().x, controller.getActiveNode().y])
+
+                                        if len(triLogic.neighbours) > 0:
+                                            controller.edges.append([controller.getActivePos(), centerNode])
+                                            controller.currentEdges.append([controller.getActivePos(), centerNode])
+                                            controller.setActivePos(centerNode)
+                                            triLogic.chosenCenter.append(centerNode)
+                                        else:
+                                            for edge in controller.currentEdges:
+                                                controller.edges.remove(edge)
+                                            controller.nodes.__getitem__(controller.getActiveItem()).relations.remove(
+                                                -1)
+                                            triLogic.updateCentroids()
+                                            triLogic.clearChosenCenter()
+                                            triLogic.clearNeighbours()
+                                            controller.currentEdges.clear()
+                                            controller.setActiveNode(None)
+                                            controller.setActivePos(None)
+                                            controller.setActiveItem(None)
 
                             # Select end node ------------------
                             for node in controller.getNodes():
@@ -460,6 +477,7 @@ def playGame(amount, txt, txt_input):
                                             triLogic.updateCentroids()
                                             triLogic.clearChosenCenter()
                                             triLogic.clearNeighbours()
+                                            controller.currentEdges.clear()
 
                                             controller.setActiveNode(None)
                                             controller.setActivePos(None)

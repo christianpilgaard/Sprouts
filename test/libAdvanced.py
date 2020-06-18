@@ -140,13 +140,28 @@ class Advanced:
                         for centerNode in triLogic.getCentroids():
                             if centerNode in triLogic.getNeighbours():
                                 if controller.nodeCollision(centerNode, mousePos, "centerNode"):
-                                    controller.getEdges().append([controller.getActivePos(), centerNode])
-                                    controller.setActivePos(centerNode)
-                                    triLogic.getChosenCenter().append(centerNode)
+                                    triLogic.neighbours.clear()
+                                    triLogic.neighbours = triLogic.dt.exportNeighbours(centerNode,
+                                                                                       "centerNode",
+                                                                                       triLogic.chosenCenter,
+                                                                                       [controller.getActiveNode().x,
+                                                                                        controller.getActiveNode().y])
 
-                                    triLogic.getNeighbours().clear()
-                                    triLogic.setNeighbours(triLogic.getDt().exportNeighbours(centerNode,
-                                            "centerNode", triLogic.getChosenCenter(), controller.getActiveNode().getPos()))
+                                    if len(triLogic.neighbours) > 0:
+                                        controller.edges.append([controller.getActivePos(), centerNode])
+                                        controller.tempEdge.append([controller.getActivePos(), centerNode])
+                                        controller.setActivePos(centerNode)
+                                        triLogic.chosenCenter.append(centerNode)
+                                    else:
+                                        for edge in controller.tempEdge:
+                                            controller.edges.remove(edge)
+                                        controller.getActiveNode().getRelations().remove(-1)
+                                        triLogic.updateCentroids()
+                                        triLogic.clearChosenCenter()
+                                        triLogic.clearNeighbours()
+                                        controller.tempEdge.clear()
+                                        controller.setActiveNode(None)
+                                        controller.setActivePos(None)
 
                         # Select end node ------------------
                         for node in controller.getNodes():
@@ -176,6 +191,7 @@ class Advanced:
                                         triLogic.clearChosenCenter()
                                         triLogic.clearNeighbours()
 
+                                        controller.tempEdge.clear()
                                         controller.setActiveNode(None)
                                         controller.setActivePos(None)
 
