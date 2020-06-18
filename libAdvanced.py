@@ -65,8 +65,8 @@ class Advanced:
 
 
                         # Add new path and node
-                        triLogic.dt.addPath(s.getPos(), e.getPos(), triLogic.getChosenCenter(), mid)
-                        triLogic.updateCentroids() # Går tilbage til menu her
+                        triLogic.dt.addPath(s.getPos(), e.getPos(), triLogic.getChosenCenter(), mid) # Crasher her
+                        triLogic.updateCentroids()
                         triLogic.clearChosenCenter()
 
                         controller.setTurn(controller.getTurn() + 1)
@@ -79,8 +79,14 @@ class Advanced:
                     else:
                         controller.setError(True)
                         break
-                startTime = time.time()
-                while 3 > time.time() - startTime:
+
+                # Wait for input
+                nextButton = pygame.Rect(680, 20, 100, 50)
+                wait = True
+                while wait:
+                    pygame.draw.rect(system.getScreen(), system.getBlack(), nextButton)
+                    system.drawText('next', system.getFontMedium(), system.getWhite(), system.getScreen(), 730, 45)
+                    pygame.display.update()
                     for event in pygame.event.get():
                         mousePos = pygame.mouse.get_pos()
 
@@ -102,6 +108,8 @@ class Advanced:
                                 return 0
                             elif system.getRestartButton().collidepoint(pygame.mouse.get_pos()):
                                 return 1
+                            elif nextButton.collidepoint(pygame.mouse.get_pos()):
+                                wait = False
 
             if controller.getError():
                 while 1:
