@@ -66,6 +66,12 @@ class Advanced:
 
                         # Add new path and node
                         triLogic.dt.addPath(s.getPos(), e.getPos(), triLogic.getChosenCenter(), mid) # Crasher her
+
+                        minRadius = triLogic.dt.exportMinRadius()
+                        if minRadius < controller.getSize():
+                            controller.setSize(math.floor(minRadius))
+                            triLogic.setCentersize((math.floor(minRadius * 2 / 3)))
+                            
                         triLogic.updateCentroids()
                         triLogic.clearChosenCenter()
 

@@ -137,8 +137,9 @@ class GameController:
     # Method for setting up initial nodes
     def startGame(self, n):
         self.getNodes().clear()
+        self.addNode((system.getWidth() / 2), ((system.getHeight()+100) / 2))
         angle = 0
-        for i in range(n):
+        for i in range(n-1):
             x = (system.getWidth() / 2.7) * math.cos(angle * 0.0174532925)
             y = (system.getHeight() / 2.7) * math.sin(angle * 0.0174532925)
             self.addNode((system.getWidth() / 2) + x, ((system.getHeight()+100) / 2) + y)
