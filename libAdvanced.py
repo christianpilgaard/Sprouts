@@ -48,6 +48,7 @@ class Advanced:
                         for j, point in enumerate(paths[i]):
                             if not j == 0:
                                 controller.getEdges().append([paths[i][j - 1], point])
+
                                 if not point == paths[i][-1]:
                                     triLogic.getChosenCenter().append(point)
 
@@ -63,7 +64,6 @@ class Advanced:
                         s.getRelations().append(e)
                         e.getRelations().append(s)
 
-
                         # Add new path and node
                         triLogic.dt.addPath(s.getPos(), e.getPos(), triLogic.getChosenCenter(), mid) # Crasher her
 
@@ -71,7 +71,7 @@ class Advanced:
                         if minRadius < controller.getSize():
                             controller.setSize(math.floor(minRadius))
                             triLogic.setCentersize((math.floor(minRadius * 2 / 3)))
-                            
+
                         triLogic.updateCentroids()
                         triLogic.clearChosenCenter()
 

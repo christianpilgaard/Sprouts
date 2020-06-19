@@ -76,7 +76,10 @@ class GameController:
         return self.size
 
     def setSize(self, size):
-        self.size = size
+        if size < 8:
+            self.size = 8
+        else:
+            self.size = size
 
     def getActiveNode(self):
         return self.activeNode

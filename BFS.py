@@ -37,7 +37,19 @@ class pathfinding:
         # visited and enqueue it
         if not self.getStart() == self.getGoal():
             visited[str(self.getStart())] = True
-        queue.append([[self.getStart()], visited])
+
+        for i in self.getTri().exportNeighbours(self.getStart(), self.getType(self.getStart()), [self.getStart()], self.getStart()):
+            if i == self.getGoal():
+                path = [self.getStart()]
+                path.append(i)
+                paths.append(path)
+            elif self.getType(i) == "centerNode":
+                path = [self.getStart()]
+                path.append(i)
+                v = visited.copy()
+                v[str(i)] = True
+                queue.append([path, v])
+
 
         while queue:
 
@@ -61,9 +73,9 @@ class pathfinding:
                     elif self.getType(i) == "centerNode":
                         path = p.copy()
                         path.append(i)
-                        v = visited.copy()
-                        v[str(i)] = True
-                        queue.append([path, v])
+                        #v = visited.copy()
+                        visited[str(i)] = True
+                        queue.append([path, visited])
 
 
         return paths
