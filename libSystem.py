@@ -192,5 +192,5 @@ class System:
                 return True
         else:
             pygame.draw.rect(self.getScreen(), self.getBlack(), popupButton)
-        self.drawText(text, self.getFontMedium(), self.getBlack(), self.getScreen(), 400, 350)
+        self.drawText(text, self.getFontSmall(), self.getBlack(), self.getScreen(), 400, 350)
         self.drawText('Close', self.getFontMedium(), self.getWhite(), self.getScreen(), 400, 450)

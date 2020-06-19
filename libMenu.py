@@ -148,17 +148,17 @@ class Menu:
             return ''
         elif filename[-4:] != '.txt':
             return 'Expected a txt-file.'
-#        try:
-        with open(filename, 'r') as f:
-            lines = [line.rstrip() for line in f]
-            if self.checkValidFile(lines):
-                play = 1
-                while play:
-                    play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
-            else:
-                return 'Unexpected file content format.'
-#        except:
-#            pass
+        try:
+            with open(filename, 'r') as f:
+                lines = [line.rstrip() for line in f]
+                if self.checkValidFile(lines):
+                    play = 1
+                    while play:
+                        play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
+                else:
+                    return 'Unexpected file content format.'
+        except:
+            pass
         return ''
 
     # Checks the validity of a txt-file
