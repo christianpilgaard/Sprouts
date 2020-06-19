@@ -1,5 +1,3 @@
-
-
 # ------------------------------------------------
 # Node class for initializing and operating on vertices
 class Node:

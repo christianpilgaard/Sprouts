@@ -1,10 +1,8 @@
 import pygame, random, sys, math, time
 import numpy as np
 from pygame.locals import *
-from Triangulation import Triangulation
 from BFS import pathfinding
 from libSystem import *
-from libNode import *
 from libController import *
 from libTriangulationLogic import *
 
@@ -81,6 +79,7 @@ class Advanced:
                                              triLogic.dt.getAllEdges(),
                                              triLogic.getNeighbours(), controller.getSize(), triLogic.getCentersize(), 5,
                                              controller.getPlayer())
+                        system.drawText('%s to %s' % (inp[:inp.find(' ')], inp[inp.find(' ')+1:]), system.getFontMedium(), system.getBlack(), system.getScreen(), 600, 45)
                         pygame.display.update()
                     else:
                         controller.setError(True)

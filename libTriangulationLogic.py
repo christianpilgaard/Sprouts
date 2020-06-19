@@ -1,9 +1,6 @@
 import pygame, random, sys, math
 from pygame.locals import *
 from Triangulation import Triangulation
-from libSystem import *
-from libNode import *
-from libController import *
 
 
 # ------------------------------------------------

@@ -2,7 +2,6 @@ import pygame, random, sys, math
 import numpy as np
 from pygame.locals import *
 from libSystem import *
-from libNode import *
 from libController import *
 
 import libSystem
