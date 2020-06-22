@@ -217,3 +217,7 @@ class System:
             pygame.draw.rect(self.getScreen(), self.getBlack(), popupButton)
         self.drawText(text, self.getFontMedium(), self.getBlack(), self.getScreen(), 400, 350)
         self.drawText('Close', self.getFontMedium(), self.getWhite(), self.getScreen(), 400, 450)
+
+    def drawId(self, nodes):
+        for node in nodes:
+            self.drawText(str(node.getId() + 1), self.getFontSmall(), self.getWhite(), self.getScreen(), node.getX(), node.getY())

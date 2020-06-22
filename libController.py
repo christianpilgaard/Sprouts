@@ -25,7 +25,7 @@ class GameController:
         self.lastPos = None
         self.moved = False
         self.overlap = False
-        self.click = False
+        self.space = False
         # AI related
         self.p1ai = False
         self.p2ai = False
@@ -111,6 +111,12 @@ class GameController:
 
     def setError(self, error):
         self.error = error
+
+    def getSpace(self):
+        return self.space
+
+    def setSpace(self, space):
+        self.space = space
 
     def getDone(self):
         return self.done

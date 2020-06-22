@@ -35,10 +35,9 @@ class Menu:
         circle_rect = (190, 175)
         circle_center = (200, 180)
         slider_base = pygame.Rect(200, 175, 500, 10)
-        button_1 = pygame.Rect(150, 235, 500, 100)
-        button_2 = pygame.Rect(150, 370, 500, 100)
-        button_3 = pygame.Rect(150, 505, 500, 100)
-        button_4 = pygame.Rect(150, 640, 500, 100)
+        button_1 = pygame.Rect(120, 240, 580, 120)
+        button_2 = pygame.Rect(120, 390, 580, 120)
+        button_3 = pygame.Rect(120, 540, 580, 120)
         while True:
             system.getScreen().fill(white)
             system.drawText('Sprouts', fontBig, black, screen, 400, 90)
@@ -52,7 +51,10 @@ class Menu:
                 if click:
                     play = 1
                     while play:
+                        #try:
                         play = Drawing().playDrawing(int(slider_no))
+                        #except:
+                            #break
             else:
                 pygame.draw.rect(screen, black, button_1)
             if button_2.collidepoint((mx,my)) and error_text == '':
@@ -60,23 +62,18 @@ class Menu:
                 if click:
                     play = 1
                     while play:
-                        play = Advanced().playAdvanced(int(slider_no), False, [])
+                        try:
+                            play = Advanced().playAdvanced(int(slider_no), False, [])
+                        except:
+                            break
             else:
                 pygame.draw.rect(screen, black, button_2)
             if button_3.collidepoint((mx,my)) and error_text == '':
                 pygame.draw.rect(screen, green, button_3)
                 if click:
-                    play = 1
-                    while play:
-                        play = AI2().playAdvanced(int(slider_no))
-            else:
-                pygame.draw.rect(screen, black, button_3)
-            if button_4.collidepoint((mx,my)) and error_text == '':
-                pygame.draw.rect(screen, green, button_4)
-                if click:
                     error_text = self.getFile()
             else:
-                pygame.draw.rect(screen, black, button_4)
+                pygame.draw.rect(screen, black, button_3)
             if slider_circle.collidepoint((mx,my)) and error_text == '':
                 if hold:
                     slide_hold = True
@@ -100,10 +97,9 @@ class Menu:
             # Draw objects
             pygame.draw.rect(screen, black, slider_base)
             pygame.draw.circle(screen, green, circle_center, 20)
-            system.drawText('Drawing', fontBig, white, screen, 400, 285)
-            system.drawText('Advanced', fontBig, white, screen, 400, 420)
-            system.drawText('A.I.', fontBig, white, screen, 400, 555)
-            system.drawText('txt-file', fontBig, white, screen, 400, 690)
+            system.drawText('Drawing', fontBig, white, screen, 400, 300)
+            system.drawText('Advanced', fontBig, white, screen, 400, 450)
+            system.drawText('txt-file', fontBig, white, screen, 400, 600)
             system.drawText(slider_no, fontSmall, black, screen, slider_text, 150)
             system.drawText('No. of nodes:', fontSmall, black, screen, 120, 180)
 

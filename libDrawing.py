@@ -39,7 +39,7 @@ class Drawing:
                     elif event.key == K_BACKSPACE:
                         return
                     elif event.key == K_SPACE:
-                        print("Space")
+                        controller.setSpace(not controller.getSpace())
 
                 # Select node -----------------------------
                 # Mouse 1 for drawing
@@ -127,4 +127,6 @@ class Drawing:
                         system.updateScreen1(True, controller.getNodes(), controller.getEdges(), controller.getSize(), 5, controller.getPlayer())
 
             system.updateScreen1(False, controller.getNodes(), controller.getEdges(), controller.getSize(), 5, controller.getPlayer())
+            if controller.getSpace():
+                system.drawId(controller.getNodes())
             pygame.display.update()
