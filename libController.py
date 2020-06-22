@@ -183,6 +183,7 @@ class GameController:
         for n in self.getNodes():
             if n.getId() == id:
                 return n
+        return None
 
     # Method for setting up initial nodes
     def startGame(self, n):

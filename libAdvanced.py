@@ -30,6 +30,9 @@ class Advanced:
             for inp in txt_input:
                 s = controller.findNode(int(inp[:inp.find(' ')]) - 1)
                 e = controller.findNode(int(inp[inp.find(' '):]) - 1)
+                if s is None or e is None:
+                    controller.setError(True)
+                    break
 
                 if len(s.getRelations()) < 3 and len(e.getRelations()) < 3:
                     paths = pathfinding(triLogic.dt, s.getPos(), e.getPos()).getPaths()
