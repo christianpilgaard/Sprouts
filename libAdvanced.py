@@ -441,7 +441,6 @@ class Advanced:
                     path = ai.getShortestPath(paths)
 
                     if path is not None:
-                        print("AI OUTPUT: connecting node", s.id, "to", e.id, "through path", path)
                         if len(paths) > 0:
                             for j, point in enumerate(path):
                                 if not j == 0:
