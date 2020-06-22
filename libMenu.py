@@ -6,6 +6,7 @@ from pygame.locals import *
 from libSystem import *
 from libController import *
 from libDrawing import *
+from libAI2 import *
 from libAdvanced import *
 
 class Menu:
@@ -65,7 +66,9 @@ class Menu:
             if button_3.collidepoint((mx,my)) and error_text == '':
                 pygame.draw.rect(screen, green, button_3)
                 if click:
-                    pass
+                    play = 1
+                    while play:
+                        play = AI2().playAdvanced(int(slider_no))
             else:
                 pygame.draw.rect(screen, black, button_3)
             if button_4.collidepoint((mx,my)) and error_text == '':
@@ -148,17 +151,17 @@ class Menu:
             return ''
         elif filename[-4:] != '.txt':
             return 'Expected a txt-file.'
-        try:
-            with open(filename, 'r') as f:
-                lines = [line.rstrip() for line in f]
-                if self.checkValidFile(lines):
-                    play = 1
-                    while play:
-                        play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
-                else:
-                    return 'Unexpected file content format.'
-        except:
-            pass
+#        try:
+        with open(filename, 'r') as f:
+            lines = [line.rstrip() for line in f]
+            if self.checkValidFile(lines):
+                play = 1
+                while play:
+                    play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
+            else:
+                return 'Unexpected file content format.'
+#        except:
+#            pass
         return ''
 
     # Checks the validity of a txt-file
