@@ -218,15 +218,11 @@ class Advanced:
 
                     # Enable AI player 1 ----------------------------
                     elif system.getP1AIButton().collidepoint(pygame.mouse.get_pos()):
-
                         controller.toggleP1ai()
-                        print(controller.getP1AIcount())
 
                     # Enable AI player 2 ----------------------------
                     elif system.getP2AIButton().collidepoint(pygame.mouse.get_pos()):
-
                         controller.toggleP2ai()
-                        print(controller.getP2AIcount())
 
                     # No active node ------------------------
                     elif controller.getActivePos() is None:
@@ -376,7 +372,6 @@ class Advanced:
                                 for path in paths:
                                     allPaths.append(path)
 
-                        print(allPaths[0])
                         if allPaths != []:
                             if allPaths[0] is not None:
                                 path = allPaths[0]
@@ -445,9 +440,7 @@ class Advanced:
 
                     path = ai.getShortestPath(paths)
 
-                    if path is None:
-                        print("No path found.")
-                    else:
+                    if path is not None:
                         print("AI OUTPUT: connecting node", s.id, "to", e.id, "through path", path)
                         if len(paths) > 0:
                             for j, point in enumerate(path):

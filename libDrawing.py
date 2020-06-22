@@ -60,7 +60,6 @@ class Drawing:
                     controller.setDrawing(controller.checkCollision())
                     if controller.getLastPos() is not None:
                         if controller.getLastPos() != controller.getMousePos():
-                            print(controller.getMousePos())
                             system.updatePath(controller.getLastPos(), controller.getMousePos())
                             controller.fillBlank(controller.getLastPos(), controller.getMousePos())
                             controller.getTempEdge().append(controller.getMousePos())
