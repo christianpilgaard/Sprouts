@@ -38,7 +38,7 @@ class pathfinding:
         if not self.getStart() == self.getGoal():
             visited[str(self.getStart())] = True
 
-        for i in self.getTri().exportNeighbours(self.getStart(), self.getType(self.getStart()), [self.getStart()], self.getStart()):
+        for i in self.getTri().exportNeighbours(self.getStart(), self.getType(self.getStart()), [], self.getStart()):
             if i == self.getGoal():
                 path = [self.getStart()]
                 path.append(i)
@@ -64,7 +64,7 @@ class pathfinding:
             # has not been visited, then mark it
             # visited and enqueue it
 
-            for i in self.getTri().exportNeighbours(n, self.getType(n), p, self.getStart()):
+            for i in self.getTri().exportNeighbours(n, self.getType(n), p[1:], self.getStart()):
                 if not visited[str(i)]:
                     if i == self.getGoal():
                         path = p.copy()
