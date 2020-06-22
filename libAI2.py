@@ -17,10 +17,6 @@ from libAI import *
 #    - Example path: [[696.2962962962963, 450.0], [424.31595241249335, 385.40605339254944], [696.2962962962963, 450.0]]
 # 3: Paths algorithm not returning correct paths?
 
-
-
-
-
 # -------------------------------------------------------------------
 # --------------------------- MAIN GAME -----------------------------
 # -------------------------------------------------------------------
@@ -226,15 +222,13 @@ class AI2:
                     path = None
 
                     # ALL PATHS APPROACH -----------------------
-                    if 1 == 0:
+
+                    if 0 == 1:
                         allPaths = []
                         path = None
 
                         for node in legalNodes:
                             s = node
-
-                            if len(s.relations) > 1:
-                                legalNodes.remove(s)
 
                             for node in legalNodes:
                                 e = node
@@ -244,13 +238,13 @@ class AI2:
                                 for path in paths:
                                     allPaths.append(path)
 
-                        print(allPaths)
+                        print(allPaths[0])
                         if allPaths != []:
                             if allPaths[0] is not None:
-                                path = allPaths[-1]
+                                path = allPaths[0]
 
                     # SNIPING PATHS BUT STILL CHECKING ALL IN CASE APPROACH  -----------------------
-                    if 1 == 0:
+
                         path = None
 
                         # Find random start and end node
@@ -301,14 +295,10 @@ class AI2:
                                             break
 
                     # FIND SHORTEST PATH APPROACH -----------------------
-
                     # Get random legal start-node
+
                     if len(legalNodes)-1 != 0:
                         s = legalNodes[ai.getRandom(len(legalNodes) - 1)]
-
-                    # Get random legal end-node
-                    if len(s.relations) > 1:
-                        legalNodes.remove(s)
 
                     if len(legalNodes) - 1 != 0:
                         e = legalNodes[ai.getRandom(len(legalNodes) - 1)]
@@ -344,6 +334,11 @@ class AI2:
                             # Add new path and node // CRASHER???
                             triLogic.dt.addPath(s.getPos(), e.getPos(), triLogic.getChosenCenter(), mid)
 
+                            minRadius = triLogic.dt.exportMinRadius()
+                            if minRadius < controller.getSize():
+                                controller.setSize(math.floor(minRadius))
+                                triLogic.setCentersize((math.floor(minRadius * 2 / 3)))
+
                             # Update view
                             triLogic.updateCentroids()
                             triLogic.clearChosenCenter()
@@ -355,40 +350,39 @@ class AI2:
                 # --------------------------- WIN CONDITION -------------------------
                 # -------------------------------------------------------------------
 
-                if controller.getTurn() == 3 * amount - 1:
-                    controller.setDone(True)
-                elif controller.getTurn() >= 2 * amount:
-                    unlockedNodes = []
-                    Check = True
-                    pygame.time.delay(1000)
-                    controller.setDone(True)
-                    for node in controller.getNodes():
-                        if len(node.getRelations()) < 2:
-                            Check = False
-                            break
-                        elif len(node.getRelations()) < 3:
-                            unlockedNodes.append(node)
-                    if Check:
-                        for i, uNode1 in enumerate(unlockedNodes):
-                            for uNode2 in unlockedNodes[i + 1:]:
-                                paths = pathfinding(triLogic.dt, uNode1.getPos(),
-                                                    uNode2.getPos()).getPaths()
-                                if len(paths) > 0:
-                                    controller.setDone(False)
-                                    break
-                            if not controller.getDone():
+                if 1 == 0:
+                    if controller.getTurn() == 3 * amount - 1:
+                        controller.setDone(True)
+                    elif controller.getTurn() >= 2 * amount:
+                        unlockedNodes = []
+                        Check = True
+                        pygame.time.delay(1000)
+                        controller.setDone(True)
+                        for node in controller.getNodes():
+                            if len(node.getRelations()) < 2:
+                                Check = False
                                 break
-                            elif i == len(unlockedNodes) - 1:
-
-                                pygame.time.delay(1000)
-                                controller.setDone(True)
+                            elif len(node.getRelations()) < 3:
+                                unlockedNodes.append(node)
+                        if Check:
+                            for i, uNode1 in enumerate(unlockedNodes):
+                                for uNode2 in unlockedNodes[i + 1:]:
+                                    paths = pathfinding(triLogic.dt, uNode1.getPos(),
+                                                        uNode2.getPos()).getPaths()
+                                    if len(paths) > 0:
+                                        controller.setDone(False)
+                                        break
+                                if not controller.getDone():
+                                    break
+                                elif i == len(unlockedNodes) - 1:
+                                    controller.setDone(True)
 
             # Update view
             system.fillWhite()
             system.drawGUI(controller.getP1AI(), controller.getP2AI())
-            system.updateTriLines(triLogic.dt.getAllEdges(), controller.getThickness())
+            # system.updateTriLines(triLogic.dt.getAllEdges(), controller.getThickness())
             system.updateEdges2(controller.getEdges(), controller.getThickness())
-            system.updateCentroids(triLogic.getCentroids(), triLogic.getCentersize())
+            # system.updateCentroids(triLogic.getCentroids(), triLogic.getCentersize())
             system.updateNeighbours(triLogic.getNeighbours(), 12)
             system.updateNodes(controller.getNodes(), controller.getSize())
             system.displayPlayer(controller.getPlayer())

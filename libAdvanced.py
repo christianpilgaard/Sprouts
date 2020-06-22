@@ -28,12 +28,6 @@ class Advanced:
         controller.startGame(amount)
         triLogic.initializeTriangulation(controller.getNodes())
         if txt:
-            system.fillWhite()
-            system.drawGUI()
-            system.updateEdges2(controller.getEdges(), 5)
-            system.updateNodes(controller.getNodes(), controller.getSize())
-            system.displayPlayer(controller.getPlayer())
-            pygame.display.update()
             for inp in txt_input:
                 s = controller.findNode(int(inp[:inp.find(' ')]) - 1)
                 e = controller.findNode(int(inp[inp.find(' '):]) - 1)
@@ -78,11 +72,16 @@ class Advanced:
 
                         controller.setTurn(controller.getTurn() + 1)
 
+                        # Update view
                         system.fillWhite()
-                        system.drawGUI()
-                        system.updateEdges2(controller.getEdges(), 5)
+                        system.drawGUI(0, 0)
+                        # system.updateTriLines(triLogic.dt.getAllEdges(), controller.getThickness())
+                        system.updateEdges2(controller.getEdges(), controller.getThickness())
+                        # system.updateCentroids(triLogic.getCentroids(), triLogic.getCentersize())
+                        system.updateNeighbours(triLogic.getNeighbours(), 12)
                         system.updateNodes(controller.getNodes(), controller.getSize())
                         system.displayPlayer(controller.getPlayer())
+
                         system.drawText('%s to %s' % (inp[:inp.find(' ')], inp[inp.find(' ')+1:]), system.getFontMedium(), system.getBlack(), system.getScreen(), 600, 45)
                         pygame.display.update()
                     else:
@@ -122,7 +121,7 @@ class Advanced:
 
             if controller.getError():
                 while 1:
-                    close = system.drawPopUp('Unable to make the move: %s to %s' % (inp[:inp.find(' ')], inp[inp.find(' ')+1:]))
+                    close = system.drawPopUp('Unable to make the move.')
                     pygame.display.update()
                     if close:
                         break
@@ -133,11 +132,10 @@ class Advanced:
                     if close:
                         break
             while 1:
-                system.fillWhite()
-                system.drawGUI()
-                system.updateEdges2(controller.getEdges(), 2)
-                system.updateNodes(controller.getNodes(), controller.getSize())
-                system.displayPlayer(controller.getPlayer())
+                system.updateScreen2(controller.getNodes(), controller.getEdges(), triLogic.getCentroids(),
+                                     triLogic.dt.getAllEdges(),
+                                     triLogic.getNeighbours(), controller.getSize(), triLogic.getCentersize(), 5,
+                                     controller.getPlayer())
                 pygame.display.update()
                 for event in pygame.event.get():
                     mousePos = pygame.mouse.get_pos()

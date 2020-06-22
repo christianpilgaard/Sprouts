@@ -186,7 +186,7 @@ class GameController:
             x = (system.getWidth() / 2.7) * math.cos(angle * 0.0174532925)
             y = (system.getHeight() / 2.7) * math.sin(angle * 0.0174532925)
             self.addNode((system.getWidth() / 2) + x, ((system.getHeight()+100) / 2) + y)
-            angle += 360 / (n-1)
+            angle += 360 / (n)
 
     # Method for checking whether a node
     def nodeCollision(self, node, mousePos, type):
