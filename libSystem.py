@@ -30,7 +30,7 @@ class System:
         self.p1AIButton = pygame.Rect(width-240, 20, 100, 50)
         self.p2AIButton = pygame.Rect(width-120, 20, 100, 50)
         # Screen
-        self.screen = pygame.display.set_mode((width, height), RESIZABLE)
+        self.screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption('Sprouts')
         # FPS
         self.mainClock = pygame.time.Clock()
@@ -143,13 +143,13 @@ class System:
             self.fillWhite()
         self.updateEdges1(edges, thickness)
         self.updateNodes(nodes, size)
-        self.drawGUI(0, 0)
+        self.drawGUI()
         self.displayPlayer(player)
 
     # Method updating screen
     def updateScreen2(self, nodes, edges, centroids, triEdges, neighbours, size, cenSize, thickness, player):
         self.fillWhite()
-        self.drawGUI(0, 0)
+        self.drawGUI()
         self.updateTriLines(triEdges, thickness)
         self.updateEdges2(edges, thickness)
         self.updateCentroids(centroids, cenSize)
@@ -177,24 +177,21 @@ class System:
         textrect.center = (x, y)
         surface.blit(textobj, textrect)
 
-    def drawGUI(self, p1, p2):
+    def drawGUI(self):
         pygame.draw.rect(self.getScreen(), self.getBlack(), self.getBackButton())
         self.drawText('back', self.getFontMedium(), self.getWhite(), self.getScreen(), 70, 45)
         pygame.draw.rect(self.getScreen(), self.getBlack(), self.getRestartButton())
         self.drawText('restart', self.getFontMedium(), self.getWhite(), self.getScreen(), 190, 45)
 
-        # AI Buttons
+    def drawAIbuttons(self, p1, p2):
         if p1:
             pygame.draw.rect(self.getScreen(), self.getDGreen(), self.getP1AIButton())
         else:
             pygame.draw.rect(self.getScreen(), self.getBlack(), self.getP1AIButton())
-
-        # AI Buttons
         if p2:
             pygame.draw.rect(self.getScreen(), self.getDGreen(), self.getP2AIButton())
         else:
             pygame.draw.rect(self.getScreen(), self.getBlack(), self.getP2AIButton())
-
         self.drawText('P1 AI', self.getFontMedium(), self.getWhite(), self.getScreen(), self.getWidth() - 190, 45)
         self.drawText('P2 AI', self.getFontMedium(), self.getWhite(), self.getScreen(), self.getWidth() - 70, 45)
 

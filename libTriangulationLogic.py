@@ -55,9 +55,3 @@ class TriangulationLogic:
 
     def clearChosenCenter(self):
         self.getChosenCenter().clear()
-
-    def resetGame(self):
-        self.getCentroids().clear()
-        self.getChosenCenter().clear()
-        self.getNeighbours().clear()
-        self.dt.resetTriangulation()

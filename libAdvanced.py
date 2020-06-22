@@ -22,11 +22,6 @@ class Advanced:
         controller = self.controller
         triLogic = self.triLogic
 
-        space = False
-        c = False
-
-        controller.resetGame()
-        triLogic.resetGame()
         # Initialize game
         system.init()
         controller.startGame(amount)
@@ -78,19 +73,19 @@ class Advanced:
 
                         # Update view
                         system.fillWhite()
-                        system.drawGUI(0, 0)
-                        # system.updateTriLines(triLogic.dt.getAllEdges(), controller.getThickness())
+                        system.drawGUI()
                         system.updateEdges2(controller.getEdges(), controller.getThickness())
-                        # system.updateCentroids(triLogic.getCentroids(), triLogic.getCentersize())
                         system.updateNeighbours(triLogic.getNeighbours(), 12)
                         system.updateNodes(controller.getNodes(), controller.getSize())
                         system.displayPlayer(controller.getPlayer())
-
                         system.drawText('%s to %s' % (inp[:inp.find(' ')], inp[inp.find(' ')+1:]), system.getFontMedium(), system.getBlack(), system.getScreen(), 600, 45)
                         pygame.display.update()
                     else:
                         controller.setError(True)
                         break
+                else:
+                    controller.setError(True)
+                    break
 
                 # Wait for input
                 nextButton = pygame.Rect(680, 20, 100, 50)
@@ -98,6 +93,10 @@ class Advanced:
                 while wait:
                     pygame.draw.rect(system.getScreen(), system.getBlack(), nextButton)
                     system.drawText('next', system.getFontMedium(), system.getWhite(), system.getScreen(), 730, 45)
+                    if controller.getSpace():
+                        system.drawId(controller.getNodes())
+                    else:
+                        system.updateNodes(controller.getNodes(), controller.getSize())
                     pygame.display.update()
                     for event in pygame.event.get():
                         mousePos = pygame.mouse.get_pos()
@@ -111,6 +110,8 @@ class Advanced:
                                 return 0
                             elif event.key == K_BACKSPACE:
                                 return 1
+                            elif event.key == K_SPACE:
+                                controller.setSpace(not controller.getSpace())
 
                         # Mouse action -----------------------------
                         elif event.type == MOUSEBUTTONDOWN:
@@ -136,10 +137,15 @@ class Advanced:
                     if close:
                         break
             while 1:
-                system.updateScreen2(controller.getNodes(), controller.getEdges(), triLogic.getCentroids(),
-                                     triLogic.dt.getAllEdges(),
-                                     triLogic.getNeighbours(), controller.getSize(), triLogic.getCentersize(), 5,
-                                     controller.getPlayer())
+                system.fillWhite()
+                system.drawGUI()
+                system.updateEdges2(controller.getEdges(), controller.getThickness())
+                system.updateNeighbours(triLogic.getNeighbours(), 12)
+                system.updateNodes(controller.getNodes(), controller.getSize())
+                system.displayPlayer(controller.getPlayer())
+                system.drawText('%s to %s' % (inp[:inp.find(' ')], inp[inp.find(' ')+1:]), system.getFontMedium(), system.getBlack(), system.getScreen(), 600, 45)
+                if controller.getSpace():
+                    system.drawId(controller.getNodes())
                 pygame.display.update()
                 for event in pygame.event.get():
                     mousePos = pygame.mouse.get_pos()
@@ -153,6 +159,8 @@ class Advanced:
                             return 0
                         elif event.key == K_BACKSPACE:
                             return 1
+                        elif event.key == K_SPACE:
+                            controller.setSpace(not controller.getSpace())
 
                     # Mouse action -----------------------------
                     elif event.type == MOUSEBUTTONDOWN:
@@ -168,10 +176,9 @@ class Advanced:
             while controller.getDone():
                 # Update view
                 system.fillWhite()
-                system.drawGUI(controller.getP1AI(), controller.getP2AI())
-                # system.updateTriLines(triLogic.dt.getAllEdges(), controller.getThickness())
+                system.drawGUI()
+                system.drawAIbuttons(controller.getP1AI(), controller.getP2AI())
                 system.updateEdges2(controller.getEdges(), controller.getThickness())
-                # system.updateCentroids(triLogic.getCentroids(), triLogic.getCentersize())
                 system.updateNeighbours(triLogic.getNeighbours(), 12)
                 system.updateNodes(controller.getNodes(), controller.getSize())
                 system.displayPlayer(controller.getPlayer())
@@ -194,15 +201,11 @@ class Advanced:
                     elif event.key == K_BACKSPACE:
                         return 1
                     elif event.key == K_SPACE:
-                        if space:
-                            space = False
-                        else:
-                            space = True
+                        controller.setSpace(not controller.getSpace())
                     elif event.key == K_c:
-                        if c:
-                            c = False
-                        else:
-                            c = True
+                        controller.setC(not controller.getC())
+                    elif event.key == K_l:
+                        controller.setL(not controller.getL())
 
                 # Mouse action -----------------------------
                 elif event.type == MOUSEBUTTONDOWN:
@@ -510,14 +513,17 @@ class Advanced:
 
             # Update view
             system.fillWhite()
-            system.drawGUI(controller.getP1AI(), controller.getP2AI())
-            if space:
+            system.drawGUI()
+            system.drawAIbuttons(controller.getP1AI(), controller.getP2AI())
+            if controller.getL():
                 system.updateTriLines(triLogic.dt.getAllEdges(), controller.getThickness())
             system.updateEdges2(controller.getEdges(), controller.getThickness())
-            if c:
+            if controller.getC():
                 system.updateCentroids(triLogic.getCentroids(), triLogic.getCentersize())
             system.updateNeighbours(triLogic.getNeighbours(), 12)
             system.updateNodes(controller.getNodes(), controller.getSize())
             system.displayPlayer(controller.getPlayer())
+            if controller.getSpace():
+                system.drawId(controller.getNodes())
 
             pygame.display.update()

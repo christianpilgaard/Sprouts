@@ -139,12 +139,6 @@ class Triangulation(Point, Edge, Triangle):
     def setDeadEnds(self, deadEnds):
         self.deadEnds = deadEnds
 
-    def resetTriangulation(self):
-        self.setAllPoints([])
-        self.setAllEdges([])
-        self.setAllTriangles([])
-        self.setDeadEnds([])
-
     def addCornerNodes(self):
         self.addPoint([1, 800])
         self.addPoint([1, 100])

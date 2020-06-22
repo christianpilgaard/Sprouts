@@ -26,6 +26,8 @@ class GameController:
         self.moved = False
         self.overlap = False
         self.space = False
+        self.c = False
+        self.l = False
         # AI related
         self.p1ai = False
         self.p2ai = False
@@ -118,6 +120,18 @@ class GameController:
     def setSpace(self, space):
         self.space = space
 
+    def getC(self):
+        return self.c
+
+    def setC(self, c):
+        self.c = c
+
+    def getL(self):
+        return self.l
+
+    def setL(self, l):
+        self.l = l
+
     def getDone(self):
         return self.done
 
@@ -169,19 +183,6 @@ class GameController:
         for n in self.getNodes():
             if n.getId() == id:
                 return n
-
-    def resetGame(self):
-        self.getNodes().clear()
-        self.getEdges().clear()
-        self.setActiveNode(None)
-        self.setActivePos(None)
-        self.setMousePos(None)
-        self.setDrawing(False)
-        self.setLastPos(None)
-        self.setMoved(False)
-        self.setError(False)
-        self.setDone(False)
-        self.setTurn(0)
 
     # Method for setting up initial nodes
     def startGame(self, n):

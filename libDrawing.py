@@ -19,8 +19,6 @@ class Drawing:
         system = self.system
         controller = self.controller
 
-        controller.resetGame()
-
         # Initialize game
         system.init()
         controller.startGame(amount)

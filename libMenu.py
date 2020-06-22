@@ -62,10 +62,10 @@ class Menu:
                 if click:
                     play = 1
                     while play:
-                        try:
-                            play = Advanced().playAdvanced(int(slider_no), False, [])
-                        except:
-                            break
+                        #try:
+                        play = Advanced().playAdvanced(int(slider_no), False, [])
+                        #except:
+                            #break
             else:
                 pygame.draw.rect(screen, black, button_2)
             if button_3.collidepoint((mx,my)) and error_text == '':
