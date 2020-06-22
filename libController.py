@@ -14,6 +14,7 @@ class GameController:
         # Node related variables
         self.nodes = []
         self.size = 15
+        self.thickness = 5
         self.edges = []
         self.tempEdge = []
         # Drawing related variables
@@ -25,10 +26,16 @@ class GameController:
         self.moved = False
         self.overlap = False
         self.click = False
+        # AI related
+        self.p1ai = False
+        self.p2ai = False
         # Turn
         self.done = False
         self.error = False
         self.turn = 0
+        # Button
+        self.p1AIcount = 0
+        self.p2AIcount = 0
 
     def getNodes(self):
         return self.nodes
@@ -81,6 +88,12 @@ class GameController:
         else:
             self.size = size
 
+    def getThickness(self):
+        return self.thickness
+
+    def setThickness(self, thickness):
+        self.thickness = thickness
+
     def getActiveNode(self):
         return self.activeNode
 
@@ -114,6 +127,33 @@ class GameController:
     def setTurn(self, turn):
         self.turn = turn
 
+    def setTurn(self, turn):
+        self.turn = turn
+
+    def getP1AIcount(self):
+        return self.p1AIcount
+
+    def toggleP1ai(self):
+        self.p1AIcount += 1
+
+    def getP2AIcount(self):
+        return self.p2AIcount
+
+    def toggleP2ai(self):
+        self.p2AIcount += 1
+
+    def getP1AI(self):
+        if self.getP1AIcount() % 2 == 0:
+            return False
+        else:
+            return True
+
+    def getP2AI(self):
+        if self.getP2AIcount() % 2 == 0:
+            return False
+        else:
+            return True
+
     # Method for adding vertices
     def addNode(self, x, y):
         v = Node(len(self.getNodes()), x, y, [], False, False)
@@ -146,7 +186,7 @@ class GameController:
             x = (system.getWidth() / 2.7) * math.cos(angle * 0.0174532925)
             y = (system.getHeight() / 2.7) * math.sin(angle * 0.0174532925)
             self.addNode((system.getWidth() / 2) + x, ((system.getHeight()+100) / 2) + y)
-            angle += 360 / n
+            angle += 360 / (n-1)
 
     # Method for checking whether a node
     def nodeCollision(self, node, mousePos, type):
