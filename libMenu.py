@@ -51,10 +51,10 @@ class Menu:
                 if click:
                     play = 1
                     while play:
-                        #try:
-                        play = Drawing().playDrawing(int(slider_no))
-                        #except:
-                            #break
+                        try:
+                            play = Drawing().playDrawing(int(slider_no))
+                        except:
+                            break
             else:
                 pygame.draw.rect(screen, black, button_1)
             if button_2.collidepoint((mx,my)) and error_text == '':
@@ -62,10 +62,10 @@ class Menu:
                 if click:
                     play = 1
                     while play:
-                        #try:
-                        play = Advanced().playAdvanced(int(slider_no), False, [])
-                        #except:
-                            #break
+                        try:
+                            play = Advanced().playAdvanced(int(slider_no), False, [])
+                        except:
+                            break
             else:
                 pygame.draw.rect(screen, black, button_2)
             if button_3.collidepoint((mx,my)) and error_text == '':
@@ -147,17 +147,17 @@ class Menu:
             return ''
         elif filename[-4:] != '.txt':
             return 'Expected a txt-file.'
-#        try:
         with open(filename, 'r') as f:
             lines = [line.rstrip() for line in f]
             if self.checkValidFile(lines):
                 play = 1
                 while play:
-                    play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
+                    try:
+                        play = Advanced().playAdvanced(int(lines[0]), True, lines[1:]) # start txt-file version
+                    except:
+                        break
             else:
                 return 'Unexpected file content format.'
-#        except:
-#            pass
         return ''
 
     # Checks the validity of a txt-file
